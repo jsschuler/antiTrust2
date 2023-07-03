@@ -65,13 +65,17 @@ for h in 1:4
         idx=findall(x -> x==h,ordering)
         println(idx)
         if idx==1
+            global duckTick
             duckTick=ordering[idx]
         elseif idx==2
+            global vpnTick
             vpnTick=ordering[idx]
         elseif idx==3
+            global deletionTick
             deletionTick=ordering[idx]
         else
-            sharingTick=ordering[ids]
+            global sharingTick
+            sharingTick=ordering[idx]
         end
     end
 end

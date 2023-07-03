@@ -28,7 +28,7 @@ for ticker in 1:modRuns
     tick=tick + 1
     # Step 0: new laws or search engines are introduced.
      # first, introduce any new laws or search engines 
-     if tick==30
+     if tick==duckTick
         #println("DuckDuckGo In")
         duckGen()
         @actionGen()
@@ -36,21 +36,21 @@ for ticker in 1:modRuns
     #println("Tick")
     #println(tick)
     # now introduce new laws if applicable 
-    if tick==15
+    if tick==vpnTick
         #println("VPN In")
         vpnGen(tick)
         #@actionGen()
     end
     #println("Tick")
     #println(tick)
-    if tick==20
+    if tick==deletionTick
         #println("Deletion In")
         deletionGen(tick)
         @actionGen()
     end
     #println("Tick")
     #println(tick)
-    if tick==31
+    if tick==sharingTick
         #println("Sharing In")
         sharingGen(tick)
         @actionGen()
@@ -85,7 +85,8 @@ for ticker in 1:modRuns
     for agt in agtList
         vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,agtEngine=typeof(agt.currEngine))
         # Create a CSV.Writer object for the file
-        CSV.write(currCSV, vecOut,header = false,append=true)    
+        CSV.write(currCSV, vecOut,header = false,append=true)   
+    end 
 end
 #println("Deletion")
 #for k in keys(deletionDict)
