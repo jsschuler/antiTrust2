@@ -140,16 +140,22 @@ for k in 2:cores
     resultDict[k]=nothing
 end
 
+# now, get a vector of keys 
+keyVec=ctrlFrame.key
+runDict=Dict()
+compDict=Dict()
+for key in keyVec
+    runDict[key]=false
+    compDict[key]=false
+end
 @everywhere paramVec=[]
 
 function firstRow()
     global ctrlFrame
-    ctrlWorking=ctrlFrame[ctrlFrame[:,:initialized].==false,:]
-    paramVec=ctrlWorking[1,:]
-    currKey=paramVec[4]
-    hld=ctrlFrame.initialized 
-    hld[ctrlFrame.key.==currKey].=true
-    ctrlFrame[!,:initialized].=hld
+    global runDict
+    currKey=pop!(keyVec)
+    paramVec=ctrlFrame[ctrlFrame.key==currKey,:]
+    runDict[currKey]=true
     return paramVec
 end
 
@@ -158,11 +164,8 @@ end
     # and write the code that parses the order vector and assigns entry ticks
 
 function markComplete(currKey)
-    global ctrlFrame
-    hld=ctrlFrame.complete 
-    hld[ctrlFrame.key.==currKey].=true
-    ctrlFrame[!,:complete].=hld
-    return paramVec
+    global compDict
+    compDict[currKey]=true
 end
 
 @everywhere begin 
@@ -176,9 +179,11 @@ end
 
 # first division, either the process is done or it isn,t
 
+
+
 t=0
 
-while maximum(ctrlFrame.complete.==false)==true
+while length(keyVec) > 0
     global t
     t=t+1
     for c in 2:cores
@@ -202,20 +207,25 @@ while maximum(ctrlFrame.complete.==false)==true
                 println("initials Generated")
                 coreDict[c]=@spawnat c googleGen()
             elseif resultDict[c]==:Google
+                println("Google Generated")
                 coreDict[c]=@spawnat c include("searchFunctions.jl")
             elseif resultDict[c]==:searchFuncs
+                println("Search Funcs Generated")
                 coreDict[c]=@spawnat c include("agentGen.jl")
             elseif resultDict[c]==:agentGen
+                println("Agents Generated")
                 coreDict[c]=@spawnat c include("modelFunctions.jl")
             elseif resultDict[c]==:modelFuncs
+                println("Running Model")
                 coreDict[c]=@spawnat c include("modelMain.jl")
             elseif resultDict==:complete
+                println("Marking Complete")
                 markComplete(keyDict[c])
                 break
             end
         end
 
-        println(ctrlFrame)
+        #println(ctrlFrame)
         for c in 2:cores
             coreDict[c]=nothing
         end
