@@ -147,7 +147,9 @@ function firstRow()
     ctrlWorking=ctrlFrame[ctrlFrame[:,:initialized].==false,:]
     paramVec=ctrlWorking[1,:]
     currKey=paramVec[4]
-    ctrlFrame[ctrlFrame.key.==currKey,:initialized].=true
+    hld=ctrlFrame.initialized 
+    hld[ctrlFrame.key.==currKey].=true
+    ctrlFrame[!,:initialized].=hld
     return paramVec
 end
 
@@ -157,7 +159,9 @@ end
 
 function markComplete(currKey)
     global ctrlFrame
-    ctrlFrame[ctrlFrame.key.==currKey,:complete].=true
+    hld=ctrlFrame.complete 
+    hld[ctrlFrame.key.==currKey].=true
+    ctrlFrame[!,:complete].=hld
     return paramVec
 end
 
@@ -207,12 +211,17 @@ while maximum(ctrlFrame.complete.==false)==true
                 coreDict[c]=@spawnat c include("modelMain.jl")
             elseif resultDict==:complete
                 markComplete(keyDict[c])
-                println(ctrlFrame)
-                for c in 2:cores
-                    coreDict[c]=nothing
-                end
+                break
             end
         end
 
+        println(ctrlFrame)
+        for c in 2:cores
+            coreDict[c]=nothing
+        end
+        println("Condition")
+        println(maximum(ctrlFrame.complete.==false)==true)
+        println(ctrlFrame.complete)
     end
+
 end
