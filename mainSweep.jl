@@ -21,7 +21,7 @@ using Combinatorics
 # now Step 1: Generate the control structure
 
 sweeps=5
-reps=1
+reps=2
 
 # generate a seed 
 seed1Vec=sort(repeat(rand(DiscreteUniform(1,10000),sweeps),reps))
@@ -141,35 +141,34 @@ for k in 2:cores
 end
 
 @everywhere paramVec=[]
+
 function firstRow()
     global ctrlFrame
     ctrlWorking=ctrlFrame[ctrlFrame[:,:initialized].==false,:]
     paramVec=ctrlWorking[1,:]
     currKey=paramVec[4]
     ctrlFrame[ctrlFrame.key.==currKey,:initialized].=true
-return paramVec
-
+    return paramVec
 end
 
 # two things left:
     # write the function that updates the control frame
     # and write the code that parses the order vector and assigns entry ticks
 
-#function markComplete(key)
-#    global ctrlFrame
-#    ctrlWorking=ctrlFrame[ctrlFrame[:,:initialized].==false,:]
-#    paramVec=ctrlWorking[1,:]
-#    currKey=paramVec[4]
-#    ctrlFrame[ctrlFrame.key.==currKey,:initialized].=true
-#return paramVec
-
+function markComplete(currKey)
+    global ctrlFrame
+    ctrlFrame[ctrlFrame.key.==currKey,:complete].=true
+    return paramVec
 end
 
-@everywhere function pullFirst()
-    global paramVec
-    paramVec=fetch(@spawnat 1 firstRow())
-    return :rowLoad
-end
+@everywhere begin 
+    function pullFirst()
+        
+        global paramVec
+        paramVec=fetch(@spawnat 1 firstRow())
+        return :rowLoad
+    end
+end    
 
 # first division, either the process is done or it isn,t
 
@@ -183,7 +182,6 @@ while maximum(ctrlFrame.complete.==false)==true
             # if the core dictionary is nothing, we send it the parameters
             println("Sending Parameters")
             coreDict[c]=@spawnat c pullFirst()
-
 
         elseif isready(coreDict[c])
             #println("Ready")
@@ -207,8 +205,12 @@ while maximum(ctrlFrame.complete.==false)==true
                 coreDict[c]=@spawnat c include("modelFunctions.jl")
             elseif resultDict[c]==:modelFuncs
                 coreDict[c]=@spawnat c include("modelMain.jl")
-            elseif resultDict==:complete_bipartite_graph
-
+            elseif resultDict==:complete
+                markComplete(keyDict[c])
+                println(ctrlFrame)
+                for c in 2:cores
+                    coreDict[c]=nothing
+                end
             end
         end
 
