@@ -19,7 +19,7 @@ structTuples=Set([])
 # Duck Duck Go must be introduced before data sharing 
 
 
-
+Random.seed!(seed2)
 
 tick=0
 for ticker in 1:modRuns
@@ -85,6 +85,7 @@ for ticker in 1:modRuns
     for agt in agtList
         vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,agtEngine=typeof(agt.currEngine))
         # Create a CSV.Writer object for the file
+        println("Writing")
         CSV.write(currCSV, vecOut,header = false,append=true)   
     end 
 end

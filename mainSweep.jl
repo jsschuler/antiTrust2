@@ -20,7 +20,7 @@ using Combinatorics
 
 # now Step 1: Generate the control structure
 
-sweeps=5
+sweeps=1
 reps=2
 
 # generate a seed 
@@ -128,7 +128,7 @@ ctrlFrame.key=ctrlFrame.key.*string.(1:size(ctrlFrame)[1])
 ctrlFrame[!,"initialized"]=repeat([false],size(ctrlFrame)[1])
 ctrlFrame[!,"complete"]=repeat([false],size(ctrlFrame)[1])
 # now shuffle the frame so partial runs are more useful
-#CSV.write("../antiTrustData/ctrl.csv", ctrlFrame,header = true,append=true)
+CSV.write("../antiTrustData/ctrl.csv", ctrlFrame,header = true,append=true)
 println(ctrlFrame)
 
 coreDict=Dict()
