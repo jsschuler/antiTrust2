@@ -81,6 +81,11 @@ for ticker in 1:modRuns
     resetSchedule()
     # now plot data
     #svgGen(tick)
+    currCSV="../antiTrustData/output"*key*".csv"
+    for agt in agtList
+        vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,agtEngine=typeof(agt.currEngine))
+        # Create a CSV.Writer object for the file
+        CSV.write(currCSV, vecOut,header = false,append=true)    
 end
 #println("Deletion")
 #for k in keys(deletionDict)

@@ -50,4 +50,34 @@ expDegree=floor(Int64,.2*agtCnt)
 agtGraph=watts_strogatz(agtCnt, expDegree, β)
 # Finally, we need a Poisson parameter to how much agents search
 searchQty=Poisson{Float64}(paramVec[12])
+# now set ticks
+ordering=paramVec[14]
+# generate ticks at random 
+tickList=sort(rand(Uniform(1,modTime),length(ordering)))
+# set these to -10 by default so they don't fire 
+duckTick=-10
+vpnTick=-10
+deletionTick=-10
+sharingTick=-10
+
+for h in 1:4
+    if h in ordering
+        idx=findall(x -> x==h,ordering)
+        println(idx)
+        if idx==1
+            duckTick=ordering[idx]
+        elseif idx==2
+            vpnTick=ordering[idx]
+        elseif idx==3
+            deletionTick=ordering[idx]
+        else
+            sharingTick=ordering[ids]
+        end
+    end
+end
+
+
+
+
+
 :paramGen

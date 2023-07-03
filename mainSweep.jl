@@ -161,6 +161,8 @@ function firstRow()
     global runDict
     global keyVec
     currKey=popfirst!(keyVec)
+    global key
+    key=currKey
     return dataDict[currKey]
 end
 
@@ -181,7 +183,7 @@ end
         return :rowLoad
     end
 end    
-
+@everywhere key=""
 # first division, either the process is done or it isn,t
 
 
