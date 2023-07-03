@@ -87,18 +87,18 @@ end
 
 function reverseDecision(agt::agent)
     if !isnothing(agt.lastAct)
-        println("Comparison")
+        #println("Comparison")
         global tick
-        println(typeof(agt.lastAct))
-        println("old util")
-        println(util(agt,agt.history[tick]))
-        println("new util")
-        println(util(agt,agt.history[tick-1]))
+        #println(typeof(agt.lastAct))
+        #println("old util")
+        #println(util(agt,agt.history[tick]))
+        #println("new util")
+        #println(util(agt,agt.history[tick-1]))
         result=util(agt,agt.history[tick]) > util(agt,agt.history[tick-1])
         if result
-            println("Behavior Change")
-            println(typeof(agt.currEngine))
-            println(typeof(agt.prevEngine))
+            #println("Behavior Change")
+            #println(typeof(agt.currEngine))
+            #println(typeof(agt.prevEngine))
         end
         afterAct(agt,result,agt.lastAct)
     end

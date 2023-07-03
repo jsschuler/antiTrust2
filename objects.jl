@@ -260,7 +260,7 @@ function actQuoteFunc(law,engine,idx)
             push!(actionList,$actNm(myLaw,myEngine))
             function beforeAct(agt::agent,action::$actNm)
                 if agt.currEngine==action.engine
-                    println(action.engine.aliasHld)
+                    #println(action.engine.aliasHld)
                     action.engine.aliasHld[agt.mask]=action.engine.aliasData[agt.mask]
                     action.engine.aliasData[agt.mask]=[]
                     agt.lastAct=action
@@ -301,7 +301,7 @@ function actQuoteFunc(law,engine,idx)
             push!(actionList,$actNm(myLaw,myEngine))
             function beforeAct(agt::agent,action::$actNm)
                 if agt.currEngine!=action.engine
-                    println("different")
+                    #println("different")
                     # share data from the agent's current search engine to its target search engine. 
                     action.engine.aliasData[agt.mask]=agt.currEngine.aliasData[agt.mask]
                     agt.prevEngine=agt.currEngine

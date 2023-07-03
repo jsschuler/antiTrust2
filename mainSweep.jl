@@ -142,21 +142,26 @@ end
 
 # now, get a vector of keys 
 keyVec=ctrlFrame.key
+finVec=ctrlFrame.key
 runDict=Dict()
 compDict=Dict()
+dataDict=Dict()
+
 for key in keyVec
     runDict[key]=false
     compDict[key]=false
+    dataDict[key]=Array(ctrlFrame[ctrlFrame.key.==key,:])
 end
+
+
+
 @everywhere paramVec=[]
 
 function firstRow()
-    global ctrlFrame
     global runDict
-    currKey=pop!(keyVec)
-    paramVec=ctrlFrame[ctrlFrame.key==currKey,:]
-    runDict[currKey]=true
-    return paramVec
+    global keyVec
+    currKey=popfirst!(keyVec)
+    return dataDict[currKey]
 end
 
 # two things left:
@@ -164,8 +169,8 @@ end
     # and write the code that parses the order vector and assigns entry ticks
 
 function markComplete(currKey)
-    global compDict
-    compDict[currKey]=true
+    global finVec
+    return filter!(x -> (x != currKey),finVec)
 end
 
 @everywhere begin 
@@ -183,18 +188,20 @@ end
 
 t=0
 
-while length(keyVec) > 0
-    global t
-    t=t+1
+while length(finVec) > 0
+    println("Length")
+    println(length(finVec))
     for c in 2:cores
         if isnothing(coreDict[c])
             # if the core dictionary is nothing, we send it the parameters
             println("Sending Parameters")
             coreDict[c]=@spawnat c pullFirst()
+            println(resultDict==:complete)
 
         elseif isready(coreDict[c])
             #println("Ready")
             resultDict[c]=fetch(coreDict[c])
+            println("Checking")
             println(resultDict[c])
             if resultDict[c]==:rowLoad
                 #println("rowLoaded")
@@ -218,20 +225,15 @@ while length(keyVec) > 0
             elseif resultDict[c]==:modelFuncs
                 println("Running Model")
                 coreDict[c]=@spawnat c include("modelMain.jl")
-            elseif resultDict==:complete
+            elseif resultDict[c]==:complete
                 println("Marking Complete")
                 markComplete(keyDict[c])
-                break
+                coreDict[c]=nothing
             end
         end
-
-        #println(ctrlFrame)
-        for c in 2:cores
-            coreDict[c]=nothing
-        end
-        println("Condition")
-        println(maximum(ctrlFrame.complete.==false)==true)
-        println(ctrlFrame.complete)
+        #println("Condition")
+        #println(maximum(ctrlFrame.complete.==false)==true)
+        #println(ctrlFrame.complete)
     end
 
 end

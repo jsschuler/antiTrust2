@@ -29,7 +29,7 @@ for ticker in 1:modRuns
     # Step 0: new laws or search engines are introduced.
      # first, introduce any new laws or search engines 
      if tick==30
-        println("DuckDuckGo In")
+        #println("DuckDuckGo In")
         duckGen()
         @actionGen()
     end
@@ -82,12 +82,13 @@ for ticker in 1:modRuns
     # now plot data
     #svgGen(tick)
 end
-println("Deletion")
-for k in keys(deletionDict)
-    println(deletionDict[k])
-end
+#println("Deletion")
+#for k in keys(deletionDict)
+#    println(deletionDict[k])
+#end
 #println("Sharing")
 #for k in keys(sharingDict)
 #    println(sharingDict[k])
 #end
+
 :complete
