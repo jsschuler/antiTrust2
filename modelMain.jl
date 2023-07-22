@@ -48,6 +48,7 @@ for ticker in 1:modRuns
         deletionGen(tick)
         @actionGen()
     end
+    
     #println("Tick")
     #println(tick)
     if tick==sharingTick
@@ -83,7 +84,7 @@ for ticker in 1:modRuns
     #svgGen(tick)
     currCSV="../antiTrustData/output"*key*".csv"
     for agt in agtList
-        vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,agtEngine=typeof(agt.currEngine))
+        vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,agtEngine=typeof(agt.currEngine),Duck=duckTick,VPN=vpnTick,DEL=deletionTick,SHAR=sharingTick)
         # Create a CSV.Writer object for the file
         println("Writing")
         CSV.write(currCSV, vecOut,header = false,append=true)   

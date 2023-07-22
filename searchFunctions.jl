@@ -83,7 +83,7 @@ function subsearch(agt::agent,engine::duckDuckGo,searchResolution::Float64)
     end
     if length(engine.aliasData[agt.mask]) >= 30 && !agt.mask.optOut
         #println("Fitting")
-        bestDist=fit(Beta,engine.aliasData[mask])
+        bestDist=fit(Beta,engine.aliasData[agt.mask])
     else
         bestDist=Uniform()
     end

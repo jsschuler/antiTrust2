@@ -53,7 +53,7 @@ searchQty=Poisson{Float64}(paramVec[12])
 # now set ticks
 ordering=paramVec[14]
 # generate ticks at random 
-tickList=sort(rand(Uniform(1,modTime),length(ordering)))
+tickList=sort(rand(DiscreteUniform(1,modTime),length(ordering)))
 # set these to -10 by default so they don't fire 
 duckTick=-10
 vpnTick=-10
@@ -63,25 +63,29 @@ key=paramVec[4]
 seed2=paramVec[3]
 for h in 1:4
     if h in ordering
-        idx=findall(x -> x==h,ordering)
+        idx=findall(x -> x==h,ordering)[1]
+        println("idx")
         println(idx)
         if idx==1
             global duckTick
-            duckTick=ordering[idx]
+            duckTick=tickList[ordering[idx]]
         elseif idx==2
             global vpnTick
-            vpnTick=ordering[idx]
+            vpnTick=tickList[ordering[idx]]
         elseif idx==3
             global deletionTick
-            deletionTick=ordering[idx]
+            deletionTick=tickList[ordering[idx]]
         else
             global sharingTick
-            sharingTick=ordering[idx]
+            sharingTick=tickList[ordering[idx]]
         end
     end
 end
-
-
+println("Event Ticks")
+println(duckTick)
+println(vpnTick)
+println(deletionTick)
+println(sharingTick)
 
 
 
