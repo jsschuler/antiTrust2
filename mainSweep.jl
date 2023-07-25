@@ -6,7 +6,7 @@
 #                                                                                                         #
 ###########################################################################################################
 
-cores=13
+cores=8
 using Distributed
 using Combinatorics
 @everywhere using CSV
@@ -118,7 +118,7 @@ while true
             println(resultDict[c])
             if resultDict[c]==:rowLoad
                 #println("rowLoaded")
-                coreDict[c]=@spawnat c include("parameterSet.jl")
+                coreDict[c]=@spawnat c include("parameterSet2.jl")
             elseif resultDict[c]==:paramGen
                 coreDict[c]=@spawnat c include("objects.jl")
             elseif resultDict[c]==:objects
