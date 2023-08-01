@@ -8,7 +8,7 @@
 
 # now select a seed 
 
-Random.seed!(paramVec[2])
+Random.seed!(paramVec[3])
 #strSeed=string(seed)
 ## global parameters
 # now, we need the parameters for the Exponential distributions generating the two Beta parameters for each agent 
@@ -59,8 +59,8 @@ duckTick=-10
 vpnTick=-10
 deletionTick=-10
 sharingTick=-10
-key=paramVec[4]
-seed2=paramVec[3]
+key=paramVec[1]
+seed2=paramVec[4]
 #for h in 1:4
 #    if h in ordering
 #        idx=findall(x -> x==h,ordering)[1]
