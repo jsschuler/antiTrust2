@@ -6,7 +6,7 @@
 #                                                                                                         #
 ###########################################################################################################
 
-cores=8
+cores=16
 using Distributed
 using Combinatorics
 @everywhere using CSV
@@ -100,7 +100,7 @@ while true
     function isReady(arg::Symbol)
         return false
     end
-    
+    578060
     function isReady(arg::Nothing)
         return false
     end

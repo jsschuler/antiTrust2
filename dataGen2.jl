@@ -43,7 +43,7 @@ expDegreeVec=floor.(Int64,pctConnectedVec.*agtCntVec)
 βVec=sort(repeat(rand(Uniform(0.05,.5),sweeps),reps))
 
 # Finally, we need a Poisson parameter to how much agents search
-searchQtyVec=sort(repeat(rand(Uniform(5,100),sweeps),reps))
+searchQtyVec=sort(repeat(rand(Uniform(100,200),sweeps),reps))
 modRunVec=repeat([500],sweeps*reps)
 
 currTime=now()

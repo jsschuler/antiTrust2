@@ -59,8 +59,8 @@ duckTick=-10
 vpnTick=-10
 deletionTick=-10
 sharingTick=-10
-key=paramVec[1]
-seed2=paramVec[4]
+key=paramVec[4]
+seed2=paramVec[3]
 #for h in 1:4
 #    if h in ordering
 #        idx=findall(x -> x==h,ordering)[1]
