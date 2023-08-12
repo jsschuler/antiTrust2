@@ -73,7 +73,7 @@ searchQty=DiscreteUniform(100,100)
 #sharingTick=-10
 
 
-key="JTESTDuck100"
+key="JTESTDuck200"
 seed2=257
 #for h in 1:4
 #    if h in ordering
@@ -97,7 +97,7 @@ seed2=257
 #end
 strSeed=string(seed1)*"-"*string(seed2)
 
-duckTick=100
+duckTick=200
 vpnTick=-10
 deletionTick=-10
 sharingTick=-10

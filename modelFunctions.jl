@@ -113,8 +113,15 @@ function resetSchedule()
         
         #println(typeof(currentActDict[agt]))
         #println(typeof(scheduleActDict[agt]))
-        currentActDict[agt]=scheduleActDict[agt]
-        scheduleActDict[agt]=nothing
+        # if the agent has no current action, make its current action its scheduled action
+        if isnothing(currentActDict[agt])
+            currentActDict[agt]=scheduleActDict[agt]
+            scheduleActDict[agt]=nothing
+        else
+            # otherwise, reset its current action 
+            currentActDict[agt]=nothing
+        end
+
     end
 end
 :modelFuncs
