@@ -100,7 +100,6 @@ while true
     function isReady(arg::Symbol)
         return false
     end
-    578060
     function isReady(arg::Nothing)
         return false
     end

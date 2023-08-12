@@ -5,6 +5,17 @@
 #            OECD Version                                                                                 #
 #                                                                                                         #
 ###########################################################################################################
+
+# now, we need functions whereby the search engine updates its data 
+# Google records
+function update(result::Float64,mask::alias,engine::google)
+    push!(engine.aliasData[mask],result)
+end
+# Duck Duck Go does not
+function update(result::Float64,mask::alias,engine::duckDuckGo)
+end
+:searchFuncs
+
 function subsearch(agt::agent,engine::google,searchResolution::Float64)
     # set globals 
     # first, fit the agent's history 
@@ -65,6 +76,9 @@ function subsearch(agt::agent,engine::google,searchResolution::Float64)
             guess=quantile(bestDist,rand(U,1)[1]*(hiGuess-loGuess)+loGuess)
         end
     end
+
+    update(finGuess,agt.mask,agt.currEngine)
+
     return Any[agt.mask,agt.agtNum,tick,finGuess]
 end
 
@@ -128,6 +142,8 @@ function subsearch(agt::agent,engine::duckDuckGo,searchResolution::Float64)
             guess=quantile(bestDist,rand(U,1)[1]*(hiGuess-loGuess)+loGuess)
         end
     end
+
+    update(finGuess,agt.mask,agt.currEngine)
     return Any[agt.mask,agt.agtNum,tick,finGuess]
 end
 
@@ -141,12 +157,3 @@ function search(agt::agent,searchCnt::Int64)
 end
 
 
-# now, we need functions whereby the search engine updates its data 
-# Google records
-function update(result::Float64,mask::alias,engine::google)
-    push!(engine.aliasData[mask],result)
-end
-# Duck Duck Go does not
-function update(result::Float64,mask::alias,engine::duckDuckGo)
-end
-:searchFuncs
