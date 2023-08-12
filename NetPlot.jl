@@ -26,7 +26,7 @@ fullBlack=RGBA(0,0,0,1)
 # now, define some functions on the agent 
 
 # a few dictionaries 
-searchColorDict=Dict{searchEngine,RGBA}
+#searchColorDict=Dict{searchEngine,RGBA}
 
 
 
@@ -97,9 +97,12 @@ function svgGen(tick::Int64)
     global agtList
     #global curLayout
     #run$strSeed-$currTime
-    global strSeed
-    global currTime
-    loc="../antiTrustPlots/run"*strSeed*"-"*currTime
+    global key
+    
+    loc="../antiTrustPlots/run"*key
+    if !isdir(loc)
+        run(`mkdir $loc`)
+    end
     draw(SVG(loc*"/graph"*string(tick)*".svg", 16cm, 16cm), gplot(agtGraph,layout=spectral_layout,
                                                    nodefillc=agentBaseColor.(agtList),
                                                    nodestrokec=agentOutlineColor.(agtList),

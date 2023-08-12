@@ -223,6 +223,14 @@ function actQuoteFunc(law,engine,idx)
                 end
                 #println(typeof(agt.currEngine))
                 #println(typeof(agt.prevEngine))
+                
+                # now write to a CSV 
+                global key
+                currCSV="../antiTrustData/before"*key*".csv"
+                global tick 
+                vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine))
+                CSV.write(currCSV, vecOut,header = false,append=true)
+
             end
             # In the after act, the agent makes the change permanent if it prefers it
             function afterAct(agt::agent,result::Bool,action::$actNm)
@@ -238,6 +246,11 @@ function actQuoteFunc(law,engine,idx)
                         agt.prevEngine=nothing
                         agt.lastAct=nothing
                     end
+                    global key
+                    currCSV="../antiTrustData/after"*key*".csv"
+                    global tick 
+                    vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine),keep=result)
+                    CSV.write(currCSV, vecOut,header = false,append=true)                    
                 end
             end
 
@@ -265,6 +278,12 @@ function actQuoteFunc(law,engine,idx)
                     action.engine.aliasData[agt.mask]=[]
                     agt.lastAct=action
                 end
+                # now write to a CSV 
+                global key
+                currCSV="../antiTrustData/before"*key*".csv"
+                global tick 
+                vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine))
+                CSV.write(currCSV, vecOut,header = false,append=true)
             end
 
             function afterAct(agt::agent,result::Bool,action::$actNm)
@@ -281,7 +300,13 @@ function actQuoteFunc(law,engine,idx)
                         action.engine.aliasHld[agt.mask]=[]
                         agt.lastAct=nothing
                     end
+                    global key
+                    currCSV="../antiTrustData/after"*key*".csv"
+                    global tick 
+                    vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine),keep=result)
+                    CSV.write(currCSV, vecOut,header = false,append=true)                    
                 end
+
             end
         end
     elseif typeof(law)==sharing
@@ -308,6 +333,12 @@ function actQuoteFunc(law,engine,idx)
                     agt.currEngine=action.engine
                     agt.lastAct=action
                 end
+                # now write to a CSV 
+                global key
+                currCSV="../antiTrustData/before"*key*".csv"
+                global tick 
+                vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine))
+                CSV.write(currCSV, vecOut,header = false,append=true)
             end
 
             function afterAct(agt::agent,result::Bool,action::$actNm)
@@ -321,6 +352,11 @@ function actQuoteFunc(law,engine,idx)
                         global sharingDict
                         sharingDict[agt]=true
                     end
+                    global key
+                    currCSV="../antiTrustData/after"*key*".csv"
+                    global tick 
+                    vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine),keep=result)
+                    CSV.write(currCSV, vecOut,header = false,append=true)                    
                 end
             end
         end
@@ -347,18 +383,30 @@ function actQuoteFunc(law,engine,idx)
                 agt.lastMask=agt.mask
                 agt.mask=aliasGen(true)
                 agt.lastAct=action
+               # now write to a CSV 
+               global key
+               currCSV="../antiTrustData/before"*key*".csv"
+               global tick 
+               vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine))
+               CSV.write(currCSV, vecOut,header = false,append=true)
             end
 
             function afterAct(agt::agent,result::Bool,action::$actNm)
-                if !result
-                    agt.mask=agt.lastMask
-                    agt.lastMask=nothing
-                    agt.lastAct=nothing
-                else
-                    agt.lastAct=nothing
+                if !isnothing(agt.lastAct)
+                    if !result
+                        agt.mask=agt.lastMask
+                        agt.lastMask=nothing
+                        agt.lastAct=nothing
+                    else
+                        agt.lastAct=nothing
+                    end
+                    global key
+                    currCSV="../antiTrustData/after"*key*".csv"
+                    global tick 
+                    vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine),keep=result)
+                    CSV.write(currCSV, vecOut,header = false,append=true)
                 end
             end
-
         end
 
     end

@@ -149,10 +149,20 @@ end
 
 function search(agt::agent,searchCnt::Int64)
     global searchResolution
+    global key
+    global tick
+    currCSV="../antiTrustData/search"*key*".csv"
     results=[]
     for n in 1:searchCnt
-        push!(results,subsearch(agt,agt.currEngine,searchResolution))
+        searchOut=subsearch(agt,agt.currEngine,searchResolution)
+        push!(results,searchOut)
     end
+    tickHist=[]
+    for currRes in results
+        push!(tickHist,currRes[3])
+    end
+    vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,agtEngine=typeof(agt.currEngine),optOut=agt.mask.optOut,waitTime=mean(tickHist),utils=util(agt,mean(tickHist)))
+    CSV.write(currCSV, vecOut,header = false,append=true)
     return results
 end
 

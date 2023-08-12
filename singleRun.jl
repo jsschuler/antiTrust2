@@ -18,8 +18,8 @@ using Dates
 using Plots
 using Statistics
 # now select a seed 
-
-Random.seed!(684049)
+seed1=684049
+Random.seed!(seed1)
 #strSeed=string(seed)
 ## global parameters
 # now, we need the parameters for the Exponential distributions generating the two Beta parameters for each agent 
@@ -73,7 +73,7 @@ searchQty=DiscreteUniform(100,100)
 #sharingTick=-10
 
 
-key="JTESTDuck100Vpn400"
+key="JTESTDuck100"
 seed2=257
 #for h in 1:4
 #    if h in ordering
@@ -95,8 +95,10 @@ seed2=257
 #        end
 #    end
 #end
+strSeed=string(seed1)*"-"*string(seed2)
+
 duckTick=100
-vpnTick=400
+vpnTick=-10
 deletionTick=-10
 sharingTick=-10
 
@@ -108,14 +110,14 @@ sharingTick=-10
 #println(sharingTick)
 
 # include files
-include("NetPlot.jl")
+
 include("objects.jl")
 include("initFunctions.jl")
 googleGen()
 include("searchFunctions.jl")
 include("agentGen.jl")
 include("modelFunctions.jl")
-
+include("NetPlot.jl")
 
 
 # run model? 

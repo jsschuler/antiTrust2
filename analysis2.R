@@ -10,8 +10,9 @@ setwd("/home/jsschuler/Research Code/antiTrustData")
 
 
 list.files("/home/jsschuler/Research Code/antiTrustData") -> allFi
-allFi[allFi!="ctrl.csv"] -> allFi
-fiList=list()
+
+outList=list()
+searchList=list()
 for (fi in allFi){
   read.csv(fi,header = FALSE)-> fiList[[length(fiList)+1]] -> df 
   df$key <- fi
