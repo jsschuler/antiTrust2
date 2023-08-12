@@ -53,14 +53,15 @@ searchResolution::Float64=.05
 switchPct::Float64=.05
 poissonDist::Poisson{Float64}=Poisson(switchPct*agtCnt)
 # and a probability distribution for how much agents search 
-searchCountDist::NegativeBinomial{Float64}=NegativeBinomial(1.0,.1)
+#searchCountDist::NegativeBinomial{Float64}=NegativeBinomial(1.0,.1)
+#searchCountDist::NegativeBinomial{Float64}=DiscreteUniform(100,100)
 # set the Graph structure
 pctConnected=.1
 expDegree=floor(Int64,.2*agtCnt)
 β=.2
 agtGraph=watts_strogatz(agtCnt, expDegree, β)
 # Finally, we need a Poisson parameter to how much agents search
-searchQty=Poisson{Float64}(100)
+searchQty=DiscreteUniform(100,100)
 # now set ticks
 #ordering=paramVec[14]
 # generate ticks at random 
@@ -107,6 +108,7 @@ sharingTick=-10
 #println(sharingTick)
 
 # include files
+include("NetPlot.jl")
 include("objects.jl")
 include("initFunctions.jl")
 googleGen()
