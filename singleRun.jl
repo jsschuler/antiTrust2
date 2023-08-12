@@ -97,7 +97,7 @@ seed2=257
 #end
 strSeed=string(seed1)*"-"*string(seed2)
 
-duckTick=200
+duckTick=300
 vpnTick=-10
 deletionTick=-10
 sharingTick=-10
