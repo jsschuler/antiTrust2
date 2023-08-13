@@ -2,25 +2,44 @@ library(ggplot2)
 library(dplyr)
 library(rlist)
 
-setwd("/home/jsschuler/Research Code/antiTrustData")
+setwd("~/ResearchCode/antiTrustData")
 
-# get control file
+list.files("~/ResearchCode/antiTrustData") -> allFi
 
-#read.csv("ctrl.csv",header=TRUE) -> control
-
-
-list.files("/home/jsschuler/Research Code/antiTrustData") -> allFi
-
-outList=list()
-searchList=list()
+outList <- list()
+searchList <- list()
+beforeList <- list()
+afterList <- list()
+agentList <- list()
 for (fi in allFi){
-  read.csv(fi,header = FALSE)-> fiList[[length(fiList)+1]] -> df 
-  df$key <- fi
+  if (grepl("output",fi)){read.csv(fi,header = FALSE)-> outList[[length(outList)+1]]  }
+  if (grepl("before",fi)){read.csv(fi,header = FALSE)-> beforeList[[length(beforeList)+1]]  }
+  if (grepl("search",fi)){read.csv(fi,header = FALSE)-> searchList[[length(searchList)+1]]  }
+  if (grepl("after",fi)){read.csv(fi,header = FALSE)-> afterList[[length(afterList)+1]]  }
+  if (grepl("agent",fi)){read.csv(fi,header = FALSE)-> agentList[[length(agentList)+1]]  }
 }
-list.rbind(fiList) -> runDat
+list.rbind(outList) -> outDat
+names(outDat) <- c("key","tick","agent","currEngine","duckTick","vpnTick","delTick","shareTick","optOut")
 
+list.rbind(beforeList) -> beforeDat
+names(beforeDat) <- c("key","tick","agent","beforeAct","beforeActEngine")
 
-names(runDat) <- c("key","tick","agtNum","engine","dickTick","vpnTick","deletionTick","sharingTick")
+list.rbind(searchList) -> searchDat
+names(searchDat) <- c("key","tick","agent","searchEngine","optOut","waitTime","utility")
+
+list.rbind(afterList) -> afterDat
+names(afterDat) <- c("key","tick","agent","afterAct","afterActEngine","result")
+
+list.rbind(agentList) -> agentDat
+names(agentDat) <- c("key","agent","blissPoint","selfExp","unifExp")
+
+# step 1: merge before and after acts
+
+merge(beforeDat,afterDat,by=c("key","tick","agent")) -> jointActs
+
+# now merge in search information
+merge(agentDat,searchDat,by=c("key","agent")) -> agentSearch
+
 
 #control[control$key==runDat$key[1],]
 

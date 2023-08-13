@@ -45,6 +45,7 @@ betaGen::Exponential{Float64}=Exponential(5)
 # this also comes from a beta random variable
 # how many agents care a lot about privacy?
 # higher value means fewer care 
+# was 2.0
 privacyVal::Float64=2.0
 privacyBeta::Beta{Float64}=Beta(1.0,privacyVal)
 # how close does the offered search result have to be before the agent accepts it?
@@ -73,7 +74,7 @@ searchQty=DiscreteUniform(100,100)
 #sharingTick=-10
 
 
-key="JTESTDuck200"
+key="JTESTDuck200-2"
 seed2=257
 #for h in 1:4
 #    if h in ordering
