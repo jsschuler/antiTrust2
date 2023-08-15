@@ -5,8 +5,6 @@
 #            OECD Version                                                                                 #
 #                                                                                                         #
 ###########################################################################################################
-
-cores=16
 using Distributed
 using Combinatorics
 @everywhere using CSV
@@ -20,7 +18,7 @@ using Combinatorics
 
 # load the control file 
 @load "ctrl.jld2"
-
+cores=16
 # get the number of cores / rows of data 
 
 workingFrame=ctrlFrame[.!ctrlFrame.initialized,:][1:(cores-1),:]
@@ -107,16 +105,18 @@ while true
     for c in 2:cores
         if isnothing(coreDict[c])
             # if the core dictionary is nothing, we send it the parameters
-            println("Sending Parameters")
+            #println("Sending Parameters")
+            println("core")
+            println(c)
             coreDict[c]=@spawnat c pullFirst()
-            println(resultDict==:complete)
+            #println(resultDict==:complete)
         elseif isReady(coreDict[c])
             #println("Ready")
             resultDict[c]=fetch(coreDict[c])
-            println("Checking")
-            println(resultDict[c])
+            #println("Checking")
+            #println(resultDict[c])
             if resultDict[c]==:rowLoad
-                #println("rowLoaded")
+                println("rowLoaded")
                 coreDict[c]=@spawnat c include("parameterSet2.jl")
             elseif resultDict[c]==:paramGen
                 coreDict[c]=@spawnat c include("objects.jl")
@@ -135,6 +135,9 @@ while true
                 println("Agents Generated")
                 coreDict[c]=@spawnat c include("modelFunctions.jl")
             elseif resultDict[c]==:modelFuncs
+                println("SVG functions generated")
+                coreDict[c]=@spawnat c include("NetPlot.jl")
+            elseif resultDict[c]==:svg
                 println("Running Model")
                 coreDict[c]=@spawnat c include("modelMain.jl")
             elseif resultDict[c]==:complete

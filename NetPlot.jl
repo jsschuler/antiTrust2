@@ -108,3 +108,5 @@ function svgGen(tick::Int64)
                                                    nodestrokec=agentOutlineColor.(agtList),
                                                    nodestrokelw=agentOutlineWidth.(agtList)))
 end
+
+:svg

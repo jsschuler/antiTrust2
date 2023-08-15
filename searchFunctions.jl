@@ -165,5 +165,4 @@ function search(agt::agent,searchCnt::Int64)
     CSV.write(currCSV, vecOut,header = false,append=true)
     return results
 end
-
-
+:searchFuncs

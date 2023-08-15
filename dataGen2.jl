@@ -19,7 +19,7 @@ using Combinatorics
 
 # now Step 1: Generate the control structure
 
-sweeps=10
+sweeps=100
 reps=5
 
 # generate a seed 
@@ -69,7 +69,7 @@ ctrlFrame[!,"order"].=0
 ctrlFrame[!,"initialized"]=repeat([false],size(ctrlFrame)[1])
 # now, we want to vary the time between Google and Duck Duck Go
 
-duckTick=[10,100,400]
+duckTick=[10,100,200,300,400]
 vpnTick=[-10,9,90,300]
 #deletionTick=[-10,20,110,350]
 deletionTick=[-10]

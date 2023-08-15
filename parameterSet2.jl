@@ -7,8 +7,8 @@
 ###########################################################################################################
 
 # now select a seed 
-
-Random.seed!(paramVec[3])
+seed1=paramVec[3]
+Random.seed!(seed1)
 #strSeed=string(seed)
 ## global parameters
 # now, we need the parameters for the Exponential distributions generating the two Beta parameters for each agent 
@@ -55,10 +55,7 @@ ordering=paramVec[14]
 # generate ticks at random 
 tickList=sort(rand(DiscreteUniform(1,modTime),length(ordering)))
 # set these to -10 by default so they don't fire 
-duckTick=-10
-vpnTick=-10
-deletionTick=-10
-sharingTick=-10
+
 key=paramVec[4]
 seed2=paramVec[3]
 #for h in 1:4
@@ -85,13 +82,15 @@ duckTick=paramVec[16]
 vpnTick=paramVec[17]
 deletionTick=paramVec[18]
 sharingTick=paramVec[19]
+# We need an agent memory parameter 
+# that is, for how many ticks after an agent tries an action will it refuse to try again?
+agtMemory::Int64=10
 
-
-println("Event Ticks")
-println(duckTick)
-println(vpnTick)
-println(deletionTick)
-println(sharingTick)
+#println("Event Ticks")
+#println(duckTick)
+#println(vpnTick)
+#println(deletionTick)
+#println(sharingTick)
 
 
 

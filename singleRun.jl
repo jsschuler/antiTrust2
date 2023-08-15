@@ -77,7 +77,7 @@ searchQty=DiscreteUniform(100,100)
 # that is, for how many ticks after an agent tries an action will it refuse to try again?
 agtMemory::Int64=10
 
-key="JTESTDuck300-2"
+key="JTESTDuck010-2"
 seed2=257
 #for h in 1:4
 #    if h in ordering
@@ -101,7 +101,7 @@ seed2=257
 #end
 strSeed=string(seed1)*"-"*string(seed2)
 
-duckTick=300
+duckTick=10
 vpnTick=-10
 deletionTick=-10
 sharingTick=-10
