@@ -2,7 +2,7 @@ currentActDict=Dict{agent,Union{Nothing,Null,action}}()
 scheduleActDict=Dict{agent,Union{Nothing,Null,action}}()
 deletionDict=Dict{agent,Bool}()
 sharingDict=Dict{agent,Bool}()
-
+actionHistory=Dict{agent,Dict{action,Union{Int64,Nothing}}}()
 
 # initialize all agents actions to nothing
 for agt in agtList
@@ -10,6 +10,7 @@ for agt in agtList
     scheduleActDict[agt]=nothing
     deletionDict[agt]=false
     sharingDict[agt]=false
+    actionHistory[agt]=Dict{action,Union{Int64,Nothing}}()
 end
 # we need an array to store the already generated structs to avoid redefining them 
 structTuples=Set([])
@@ -32,6 +33,13 @@ for ticker in 1:modRuns
         #println("DuckDuckGo In")
         duckGen()
         @actionGen()
+        # add actions to history dict 
+        newActions=setdiff(Set(actionList),Set(keys(actionHistory[agtList[1]])))
+        for agt in agtList
+            for addAct in newActions
+                actionHistory[agt][addAct]=nothing
+            end
+        end
     end
     #println("Tick")
     #println(tick)
@@ -39,7 +47,13 @@ for ticker in 1:modRuns
     if tick==vpnTick
         #println("VPN In")
         vpnGen(tick)
-        #@actionGen()
+        @actionGen()
+        newActions=setdiff(Set(actionList),Set(keys(actionHistory[agtList[1]])))
+        for agt in agtList
+            for addAct in newActions
+                actionHistory[agt][addAct]=nothing
+            end
+        end
     end
     #println("Tick")
     #println(tick)
@@ -47,6 +61,12 @@ for ticker in 1:modRuns
         #println("Deletion In")
         deletionGen(tick)
         @actionGen()
+        newActions=setdiff(Set(actionList),Set(keys(actionHistory[agtList[1]])))
+        for agt in agtList
+            for addAct in newActions
+                actionHistory[agt][addAct]=nothing
+            end
+        end
     end
     
     #println("Tick")
@@ -55,6 +75,12 @@ for ticker in 1:modRuns
         #println("Sharing In")
         sharingGen(tick)
         @actionGen()
+        newActions=setdiff(Set(actionList),Set(keys(actionHistory[agtList[1]])))
+        for agt in agtList
+            for addAct in newActions
+                actionHistory[agt][addAct]=nothing
+            end
+        end
     end
     #println("Action List")
     #println(length(actionList))

@@ -39,7 +39,7 @@ merge(beforeDat,afterDat,by=c("key","tick","agent")) -> jointActs
 
 # now merge in search information
 merge(agentDat,searchDat,by=c("key","agent")) -> agentSearch
-
+agentSearch %>% arrange(agent,tick) -> agentSearch
 
 #control[control$key==runDat$key[1],]
 

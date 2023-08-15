@@ -22,8 +22,18 @@ function takeAction(agt::agent)
         end
         # now, if the agent was previously scheduled to act next time
         # we do not overwrite this assignment 
+        # also, if the agent has undertaken the same action within memory, we do not schedule it 
+        global tick
+        global agtMemory
         for vAgt in agtVec
-            if isnothing(scheduleActDict[vAgt])
+            # now, we check that it has been at least a given number of ticks since the agent 
+            # last undertook this action
+            if !isnothing(actionHistory[vAgt][currentActDict[agt]])
+                cutOffTick=actionHistory[vAgt][currentActDict[agt]]+agtMemory
+            else
+                cutOffTick=0
+            end
+            if isnothing(scheduleActDict[vAgt]) & tick > cutOffTick
                 scheduleActDict[vAgt]=currAct
             end
         end
@@ -41,6 +51,8 @@ function exogenousActs()
         global poissonDist
         exogCnt=rand(poissonDist,1)[1]
         exogAgts=sample(agtList,min(exogCnt,length(agtList)),replace=false)
+        println("Exogenous Poisson")
+        println(exogCnt)
         #println("Action Count")
         #println(length(exogAgts))
         #println(typeof.(actionList))
