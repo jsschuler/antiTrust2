@@ -51,8 +51,8 @@ function exogenousActs()
         global poissonDist
         exogCnt=rand(poissonDist,1)[1]
         exogAgts=sample(agtList,min(exogCnt,length(agtList)),replace=false)
-        println("Exogenous Poisson")
-        println(exogCnt)
+        #println("Exogenous Poisson")
+        #println(exogCnt)
         #println("Action Count")
         #println(length(exogAgts))
         #println(typeof.(actionList))
