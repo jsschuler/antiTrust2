@@ -20,8 +20,9 @@ using Combinatorics
 @load "ctrl.jld2"
 cores=16
 # get the number of cores / rows of data 
-
-workingFrame=ctrlFrame[.!ctrlFrame.initialized,:][1:(cores-1),:]
+remainingFrame=ctrlFrame[.!ctrlFrame.initialized,:]
+remainingCount=min(cores-1,size(remainingFrame[1]))
+workingFrame=remainingFrame[1:remainingCount,:]
 
 initialVec=ctrlFrame.initialized
 t=0
