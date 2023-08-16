@@ -19,7 +19,7 @@ using Combinatorics
 
 # now Step 1: Generate the control structure
 
-sweeps=100
+sweeps=20
 reps=5
 
 # generate a seed 
@@ -69,21 +69,25 @@ ctrlFrame[!,"order"].=0
 ctrlFrame[!,"initialized"]=repeat([false],size(ctrlFrame)[1])
 # now, we want to vary the time between Google and Duck Duck Go
 
-duckTick=[10,100,200,300,400]
-vpnTick=[-10,9,90,300]
-#deletionTick=[-10,20,110,350]
-deletionTick=[-10]
+duckTick=[10,100]
+vpnTick=[-10,1,30,110]
+#deletionTick=[-10,1,30,110]
 sharingTick=[-10]
 
 duckFrame=DataFrame(:duckTick => duckTick)
 vpnFrame=DataFrame(:vpnTick => vpnTick)
+delFrame=DataFrame(:deletionTick => deletionTick)
 tickFrame=crossjoin(duckFrame,vpnFrame)
+#tickFrame2=crossjoin(duckFrame,delFrame)
+
+
+
 tickFrame[!,"deletionTick"].=-10
 tickFrame[!,"sharingTick"].=-10
 
 
 ctrlFrame=crossjoin(ctrlFrame,tickFrame)
-
+ctrlFrame.seed2=rand(DiscreteUniform(1,10000),size(ctrlFrame)[1])
 ctrlFrame.key=ctrlFrame.key.*string.(1:size(ctrlFrame)[1])
 ctrlFrame[!,"initialized"]=repeat([false],size(ctrlFrame)[1])
 CSV.write("../antiTrustData/ctrl.csv", ctrlFrame,header = true,append=true)
