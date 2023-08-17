@@ -107,7 +107,7 @@ for ticker in 1:modRuns
     #schedulePrint(scheduleActDict)
     resetSchedule()
     # now plot data
-    svgGen(tick)
+    #svgGen(tick)
     currCSV="../antiTrustData/output"*key*".csv"
     for agt in agtList
         vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,agtEngine=typeof(agt.currEngine),Duck=duckTick,VPN=vpnTick,DEL=deletionTick,SHAR=sharingTick,optOut=agt.mask.optOut)

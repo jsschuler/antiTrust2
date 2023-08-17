@@ -72,11 +72,11 @@ ctrlFrame[!,"initialized"]=repeat([false],size(ctrlFrame)[1])
 duckTick=[10,100]
 vpnTick=[-10,1,30,110]
 #deletionTick=[-10,1,30,110]
-sharingTick=[-10]
+#sharingTick=[-10]
 
 duckFrame=DataFrame(:duckTick => duckTick)
 vpnFrame=DataFrame(:vpnTick => vpnTick)
-delFrame=DataFrame(:deletionTick => deletionTick)
+#delFrame=DataFrame(:deletionTick => deletionTick)
 tickFrame=crossjoin(duckFrame,vpnFrame)
 #tickFrame2=crossjoin(duckFrame,delFrame)
 
