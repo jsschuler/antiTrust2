@@ -134,7 +134,7 @@ function agentGen(agtNum::Int64)
     # now, fit a gamma distribution with a scale of 1 to this
     gammaK::Float64=blissPoint+1
     agtUtil=Gamma(gammaK,1)
-    #push!(agtList,agent(privacy,myPrefs,agtUtil,unifExp,selfExp,blissPoint,Dict{Int64,Int64}()))
+    
     #println(typeof(key))
     global engineList
     # write out to agent file 

@@ -3,7 +3,7 @@ library(dplyr)
 library(rlist)
 
 setwd("~/ResearchCode/antiTrustData")
-
+read.csv("ctrl.csv",sep=",") -> control
 list.files("~/ResearchCode/antiTrustData") -> allFi
 
 outList <- list()
@@ -33,6 +33,50 @@ names(afterDat) <- c("key","tick","agent","afterAct","afterActEngine","result")
 list.rbind(agentList) -> agentDat
 names(agentDat) <- c("key","agent","blissPoint","selfExp","unifExp")
 
+# first, do we have complete data?
+
+searchDat %>% group_by(key) %>% summarise(firstTick=min(tick),lastTick=max(tick)) -> smry
+smry[smry$firstTick==1,] -> smry
+merge(searchDat,smry,by="key") -> searchDat
+
+searchDat$firstTick <- NULL
+searchDat$lastTick <- NULL
+
+searchDat$goog <- searchDat$searchEngine=="google"
+
+# now, as google percent varies over time, get minimum google percent
+searchDat %>% group_by(key,tick) %>% summarise(googPct=mean(goog)) %>% group_by(key) %>% summarise(minGoog=min(googPct)) -> minGoog
+
+# get final googal percent 
+searchDat[searchDat$tick==500,] -> lastRun
+
+lastRun %>% group_by(key) %>% summarise(googPct=mean(goog)) -> lastRunSmry
+
+merge(lastRunSmry,control,by="key") -> lastGoog
+
+ggplot() + geom_point(aes(x=lastGoog$privacyVal,y=lastGoog$googPct))
+
+lastGoog %>% group_by(privacyVal) %>% summarise(googMean=mean(googPct),cnt=n()) -> privGoog
+
+merge(minGoog,control,by="key") -> minGoog
+
+ggplot() + geom_point(aes(x=minGoog$privacyVal,y=minGoog$minGoog)) + geom_line(aes(x=privGoog$privacyVal,y=privGoog$googMean))
+ggplot() + geom_histogram(aes(color=as.factor(minGoog$duckTick),x=minGoog$minGoog))
+
+# Let's consider only the agent level setup 
+
+control[,c("key","seed1","privacyVal")] -> setup
+
+merge(setup,agentDat,by="key") -> agtSetup
+
+agtSetup$key <- NULL
+agtSetup %>% distinct() %>% arrange(agent) -> agtSetup
+
+# let's examine parameters 
+
+ggplot() + geom_point(aes(x=))
+
+
 # step 1: merge before and after acts
 
 merge(beforeDat,afterDat,by=c("key","tick","agent")) -> jointActs
@@ -43,7 +87,7 @@ agentSearch %>% arrange(agent,tick) -> agentSearch
 
 #control[control$key==runDat$key[1],]
 
-runDat %>% transform(googPct=(engine=="google")) %>% group_by(key,tick) %>% summarise(googPct=mean(googPct)) -> googTime
+outDat %>% transform(googPct=(currEngine=="google")) %>% group_by(key,tick) %>% summarise(googPct=mean(googPct)) %>% arrange(key,tick)-> googTime
 data.frame(googTime) -> googTime
 unique(googTime$key) -> allKeys
 for (j in 1:length(allKeys)){
