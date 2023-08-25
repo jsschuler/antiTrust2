@@ -18,7 +18,7 @@ using Dates
 using Plots
 using Statistics
 # now select a seed 
-seed1=684049
+seed1=6840
 Random.seed!(seed1)
 #strSeed=string(seed)
 ## global parameters
@@ -46,7 +46,7 @@ betaGen::Exponential{Float64}=Exponential(5)
 # how many agents care a lot about privacy?
 # higher value means fewer care 
 # was 2.0
-privacyVal::Float64=2.0
+privacyVal::Float64=.05
 privacyBeta::Beta{Float64}=Beta(1.0,privacyVal)
 # how close does the offered search result have to be before the agent accepts it?
 searchResolution::Float64=.05
@@ -77,8 +77,8 @@ searchQty=DiscreteUniform(100,100)
 # that is, for how many ticks after an agent tries an action will it refuse to try again?
 agtMemory::Int64=10
 
-key="JTESTDuck010-2"
-seed2=257
+key="JTESTDuck100-.05"
+seed2=5463543
 #for h in 1:4
 #    if h in ordering
 #        idx=findall(x -> x==h,ordering)[1]
@@ -101,7 +101,7 @@ seed2=257
 #end
 strSeed=string(seed1)*"-"*string(seed2)
 
-duckTick=10
+duckTick=100
 vpnTick=-10
 deletionTick=-10
 sharingTick=-10

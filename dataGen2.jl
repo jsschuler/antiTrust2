@@ -28,7 +28,7 @@ seed2Vec=rand(DiscreteUniform(1,10000),sweeps*reps)
 
 # how many agents care a lot about privacy?
 # higher value means fewer care 
-privacyValVec=sort(repeat(rand(Uniform(1.1,30),sweeps),reps))
+privacyValVec=sort(repeat(rand(Uniform(.05,3),sweeps),reps))
 #privacyBeta=Beta.(1.0,privacyVal)
 # how close does the offered search result have to be before the agent accepts it?
 searchResolutionVec=repeat([.05],sweeps*reps)
@@ -70,7 +70,7 @@ ctrlFrame[!,"initialized"]=repeat([false],size(ctrlFrame)[1])
 # now, we want to vary the time between Google and Duck Duck Go
 
 duckTick=[10,100]
-vpnTick=[-10,1,30,110]
+vpnTick=[-10,5,50,110]
 #deletionTick=[-10,1,30,110]
 #sharingTick=[-10]
 

@@ -3,7 +3,7 @@ library(dplyr)
 library(rlist)
 
 setwd("~/ResearchCode/antiTrustData")
-read.csv("ctrl.csv",sep=",") -> control
+#read.csv("ctrl.csv",sep=",") -> control
 list.files("~/ResearchCode/antiTrustData") -> allFi
 
 outList <- list()
@@ -33,6 +33,14 @@ names(afterDat) <- c("key","tick","agent","afterAct","afterActEngine","result")
 list.rbind(agentList) -> agentDat
 names(agentDat) <- c("key","agent","blissPoint","selfExp","unifExp")
 
+# get rid of cases where duck duck go enters at 10
+outDat[outDat$duckTick!=10,] -> outDat
+
+# now get the percentage of searches using Google
+outDat$goog <- outDat$currEngine=="google"
+
+outDat %>% group_by(key) %>% summarise(googPct=mean(goog)) -> smry
+
 # first, do we have complete data?
 
 searchDat %>% group_by(key) %>% summarise(firstTick=min(tick),lastTick=max(tick)) -> smry
@@ -43,6 +51,12 @@ searchDat$firstTick <- NULL
 searchDat$lastTick <- NULL
 
 searchDat$goog <- searchDat$searchEngine=="google"
+
+merge(searchDat,control,by="key") -> ctrlSearch
+
+# now, remove all information prior to the duck tick 
+
+ctrlSearch[ctrlSearch$tick >= ctrlSearch$duckTick,] -> ctrlSearch
 
 # now, as google percent varies over time, get minimum google percent
 searchDat %>% group_by(key,tick) %>% summarise(googPct=mean(goog)) %>% group_by(key) %>% summarise(minGoog=min(googPct)) -> minGoog
