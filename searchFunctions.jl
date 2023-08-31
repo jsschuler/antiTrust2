@@ -14,7 +14,7 @@ end
 # Duck Duck Go does not
 function update(result::Float64,mask::alias,engine::duckDuckGo)
 end
-:searchFuncs
+
 
 function subsearch(agt::agent,engine::google,searchResolution::Float64)
     # set globals 
@@ -63,13 +63,21 @@ function subsearch(agt::agent,engine::google,searchResolution::Float64)
             #println("Flag")
             break
         else
+            hiArray=Float64[1]
+            loArray=Float64[0]
             if guess > result
                 # if the guess is too high then we replace the upper bound with the guess 
-                maxGuess=guess
+                #maxGuess=guess
+                push!(hiArray,guess)
             else
                 # if the guess is too low, we replace the upper bound with the guess 
-                minGuess=guess
+                #minGuess=guess
+                push!(loArray,guess)
             end
+            # the max of the range should be the smallest value that was too high 
+            # parallel for min of the range
+            maxGuess=minimum(hiArray)
+            minGuess=maximum(loArray)
             # find out the quantile of the guess for the assumed distribution
             loGuess=cdf(bestDist,minGuess)
             hiGuess=cdf(bestDist,maxGuess)
@@ -129,20 +137,27 @@ function subsearch(agt::agent,engine::duckDuckGo,searchResolution::Float64)
             #println("Flag")
             break
         else
+            hiArray=Float64[1]
+            loArray=Float64[0]
             if guess > result
                 # if the guess is too high then we replace the upper bound with the guess 
-                maxGuess=guess
+                #maxGuess=guess
+                push!(hiArray,guess)
             else
                 # if the guess is too low, we replace the upper bound with the guess 
-                minGuess=guess
+                #minGuess=guess
+                push!(loArray,guess)
             end
+            # the max of the range should be the smallest value that was too high 
+            # parallel for min of the range
+            maxGuess=minimum(hiArray)
+            minGuess=maximum(loArray)
             # find out the quantile of the guess for the assumed distribution
             loGuess=cdf(bestDist,minGuess)
             hiGuess=cdf(bestDist,maxGuess)
             guess=quantile(bestDist,rand(U,1)[1]*(hiGuess-loGuess)+loGuess)
         end
     end
-
     update(finGuess,agt.mask,agt.currEngine)
     return Any[agt.mask,agt.agtNum,tick,finGuess]
 end
