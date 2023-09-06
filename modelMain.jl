@@ -3,7 +3,7 @@ scheduleActDict=Dict{agent,Union{Nothing,Null,action}}()
 deletionDict=Dict{agent,Bool}()
 sharingDict=Dict{agent,Bool}()
 actionHistory=Dict{agent,Dict{action,Union{Int64,Nothing}}}()
-
+aliasHistory=Dict{agent,Array{alias}}()
 # initialize all agents actions to nothing
 for agt in agtList
     currentActDict[agt]=nothing
@@ -11,6 +11,7 @@ for agt in agtList
     deletionDict[agt]=false
     sharingDict[agt]=false
     actionHistory[agt]=Dict{action,Union{Int64,Nothing}}()
+    aliasHistory[agt]=alias[agt.mask]
 end
 # we need an array to store the already generated structs to avoid redefining them 
 structTuples=Set([])

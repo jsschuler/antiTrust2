@@ -386,16 +386,43 @@ function actQuoteFunc(law,engine,idx)
             #println(myEngine)
             push!(actionList,$actNm(myLaw,myEngine))
             function beforeAct(agt::agent,action::$actNm)
-                # agent creates a new alias and opts out 
-                agt.lastMask=agt.mask
-                agt.mask=aliasGen(true)
-                agt.lastAct=action
-               # now write to a CSV 
-               global key
-               currCSV="../antiTrustData/before"*key*".csv"
-               global tick 
-               vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine))
-               CSV.write(currCSV, vecOut,header = false,append=true)
+                # we set this function up as a switch 
+                # that is, an agent that is already using a VPN tries not using one 
+                if !agt.mask.optOut
+                    # agent creates a new alias and opts out 
+                    agt.lastMask=agt.mask
+                    newMask=aliasGen(true)
+                    global aliasHistory
+                    push!(aliasHistory[agt],newMask)
+                    agt.mask=newMask
+                    agt.lastAct=action
+                else 
+                    # if the agent already opted out, find the alias the agent has with the most history 
+                    global aliasHistory
+                    longHist::Int64=0
+                    longAlias=aliasHistory[agt][1]
+                    for ali in aliasHistory[agt]
+                        println("alias")
+                        println(ali)
+                        if any(x -> x==ali,keys(agt.currEngine.aliasData))
+                            for hist in agt.currEngine.aliasData[ali]
+                                if length(hist) >=longHist & ali.optOut==false
+                                    longHist=length(hist)
+                                    longAlias=ali
+                                end 
+                            end
+                        end    
+                    end
+                    agt.lastMask=agt.mask 
+                    agt.mask=longAlias
+                    agt.lastAct=action
+                end
+                # now write to a CSV 
+                global key
+                currCSV="../antiTrustData/before"*key*".csv"
+                global tick 
+                vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine))
+                CSV.write(currCSV, vecOut,header = false,append=true)
                # now add this to the agent's history of actions
                actionHistory[agt][action]=tick               
             end

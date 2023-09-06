@@ -102,7 +102,7 @@ seed2=5463543
 strSeed=string(seed1)*"-"*string(seed2)
 
 duckTick=100
-vpnTick=-10
+vpnTick=90
 deletionTick=-10
 sharingTick=-10
 
@@ -115,7 +115,7 @@ sharingTick=-10
 
 # include files
 
-include("objects.jl")
+include("objects2.jl")
 include("initFunctions.jl")
 googleGen()
 include("searchFunctions.jl")

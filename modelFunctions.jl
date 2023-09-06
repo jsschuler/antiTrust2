@@ -28,6 +28,7 @@ function takeAction(agt::agent)
         for vAgt in agtVec
             # now, we check that it has been at least a given number of ticks since the agent 
             # last undertook this action
+            ### CHECK THIS LOGIC ###
             if !isnothing(actionHistory[vAgt][currentActDict[agt]])
                 cutOffTick=actionHistory[vAgt][currentActDict[agt]]+agtMemory
             else
