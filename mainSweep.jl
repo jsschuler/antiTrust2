@@ -120,7 +120,7 @@ while true
                 println("rowLoaded")
                 coreDict[c]=@spawnat c include("parameterSet2.jl")
             elseif resultDict[c]==:paramGen
-                coreDict[c]=@spawnat c include("objects.jl")
+                coreDict[c]=@spawnat c include("objects2.jl")
             elseif resultDict[c]==:objects
                 coreDict[c]=@spawnat c include("initFunctions.jl")
             elseif resultDict[c]==:initGen
