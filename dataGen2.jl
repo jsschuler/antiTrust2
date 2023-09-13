@@ -70,19 +70,20 @@ ctrlFrame[!,"initialized"]=repeat([false],size(ctrlFrame)[1])
 # now, we want to vary the time between Google and Duck Duck Go
 
 duckTick=[10,100]
-vpnTick=[-10,5,50,110]
-#deletionTick=[-10,1,30,110]
+#vpnTick=[-10,5,50,110]
+vpnTick=[-10]
+deletionTick=[-10,5,50,110]
 #sharingTick=[-10]
 
 duckFrame=DataFrame(:duckTick => duckTick)
 vpnFrame=DataFrame(:vpnTick => vpnTick)
-#delFrame=DataFrame(:deletionTick => deletionTick)
-tickFrame=crossjoin(duckFrame,vpnFrame)
-#tickFrame2=crossjoin(duckFrame,delFrame)
+delFrame=DataFrame(:deletionTick => deletionTick)
+#tickFrame=crossjoin(duckFrame,vpnFrame)
+tickFrame=crossjoin(duckFrame,vpnFrame,delFrame)
 
 
-
-tickFrame[!,"deletionTick"].=-10
+#tickFrame[!,"vpnTick"].=-10
+#tickFrame[!,"deletionTick"].=-10
 tickFrame[!,"sharingTick"].=-10
 
 
