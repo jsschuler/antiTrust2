@@ -211,6 +211,7 @@ ggplot() + geom_point(aes(x=afterDuck2VPNAgt$blissPoint,y=afterDuck2VPNAgt$vpnPc
   geom_line(aes(x=blissRange,y=eY2),color="red") + geom_line(aes(x=blissRange,y=eY3),color="green")
 
 # now, let's examine the net flow of agents from Google to Duck Duck Go over time 
+# this is a version of the model where we have deletion rules 
 
 setwd("~/ResearchCode/antiTrustData")
 read.csv("ctrl.csv",sep=",") -> control
@@ -243,4 +244,31 @@ names(afterDat) <- c("key","tick","agent","act","engine","result")
 list.rbind(agentList) -> agentDat
 names(agentDat) <- c("key","agent","blissPoint","selfExp","unifExp")
 
-# determine when we get the deletion law
+
+outDat[outDat$tick >= (outDat$duckTick+50) & outDat$vpnTick==-10 & outDat$delTick!=-10 & outDat$shareTick==-10,] -> afterDuckDel
+# now we need to know when the agent deletes as this is not reversible 
+afterDat[afterDat$act=="deletion" & afterDat$result=="true",c("key","tick","agent","result")] -> deletionTicks
+
+
+afterDuckDel %>% transform(googBool=(currEngine=="google")) %>% group_by(key,agent,optOut) %>% summarise(googPct=mean(googBool)) -> agtUsageDel
+
+
+merge(agtUsageDel,agentDat,by=c("agent","key")) -> agtPropUsageDel
+
+log((agtPropUsageDel$googPct+.01)/(1-agtPropUsageDel$googPct+.01)) -> logitGoogDel
+lm(logitGoogDel~agtPropUsageDel$blissPoint) -> centerModVPN
+
+blissRange <- seq(min(agtPropUsageDel$blissPoint),max(agtPropUsageDel$blissPoint),by=0.05)
+noVPNFrame <- data.frame(blissRange,rep(0,length(blissRange)))
+VPNFrame <- data.frame(blissRange,rep(1,length(blissRange)))
+
+predict(centerModVPN,newdata = noVPNFrame) -> yHatnoVPN
+predict(centerModVPN,newdata = VPNFrame) -> yHatVPN
+
+cbind(rep(1,length(blissRange)),blissRange,rep(0,length(xRng))) %*% matrix(centerModVPN$coefficients,ncol=1)-> yHatnoVPN
+cbind(rep(1,length(blissRange)),xRng,rep(1,length(blissRange))) %*% matrix(centerModVPN$coefficients,ncol=1)-> yHatVPN
+yHatEnoVPN <- (.01+exp(yHatnoVPN))/(1+exp(yHatnoVPN))
+yHatEVPN <- (.01+exp(yHatVPN))/(1+exp(yHatVPN))
+
+ggplot() + geom_point(aes(x=agtPropUsageVPN$blissPoint,y=agtPropUsageVPN$googPct,color=agtPropUsageVPN$optOut),alpha=.3) + geom_line(aes(x=blissRange,y=yHatEnoVPN),color="red") + geom_line(aes(x=blissRange,y=yHatEVPN),color="blue")
+
