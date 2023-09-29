@@ -4,6 +4,22 @@ library(ggpubr)
 library(dplyr)
 library(rlist)
 
+# we need a modified logit function
+
+mLogit <-function(arg){
+  return(log((arg+.01)/(1-arg+.01)))
+}
+
+invLogit <- function(arg){
+  return((.01+exp(arg))/(1+exp(arg)))
+}
+
+# we need a function that gives the bliss range 
+
+blissRangeFunc <- function(blissData){
+  return(seq(min(blissData),max(blissData),by=0.05))
+}
+
 setwd("~/ResearchCode/antiTrustDataVPN")
 read.csv("ctrl.csv",sep=",") -> control
 list.files("~/ResearchCode/antiTrustDataVPN") -> allFi
@@ -46,7 +62,7 @@ afterDuck %>% transform(googBool=(currEngine=="google")) %>% group_by(key,agent)
 merge(agtUsage,agentDat,by=c("agent","key")) -> agtPropUsage
 
 
-cor(agtPropUsage$googPct,agtPropUsage$blissPoint)
+
 
 log((agtPropUsage$googPct+.01)/(1-agtPropUsage$googPct+.01)) -> logitGoog
 lm(logitGoog~agtPropUsage$blissPoint) -> centerMod
@@ -63,7 +79,8 @@ yHatE <- (.01+exp(yHat))/(1+exp(yHat))
 # THESE PLOTS ESTABLISH THE BASIC RESULT, HIGHER BLISS POINT AGENTS SHY AWAY FROM GOOGLE
 # NOTE THESE AGENTS DO NOT HAVE VPN ACCESS
 
-ggplot() + geom_point(aes(x=agtPropUsage$blissPoint,y=agtPropUsage$googPct),alpha=.1) + geom_line(aes(x=xRng,y=yHatE),color="red") + xlab("Bliss Point") + ylab("Google Usage") + ggtitle("Modified Logit") -> plt1
+
+ggplot() + geom_point(aes(x=agtPropUsage$blissPoint,y=agtPropUsage$googPct),alpha=.1) + geom_line(aes(x=xRng,y=yHatE),color="#34a853",size=1) + xlab("Bliss Point") + ylab("Google Usage") + ggtitle("Modified Logit") -> plt1
 
 
 window <- .5
@@ -76,7 +93,7 @@ for (k in 1:(length(rng)-1)){
   mnGoog <- c(mnGoog,mean(agtPropUsage[agtPropUsage$blissPoint >= rng[k] & agtPropUsage$blissPoint < rng[k+1] ,"googPct"]))
 }
 
-ggplot() + geom_point(aes(x=agtPropUsage$blissPoint,y=agtPropUsage$googPct),alpha=.1) + geom_line(aes(x=blissX,y=mnGoog),color="red") + xlab("Bliss Point") + ylab("% Google Usage") + ggtitle("Moving Average") -> plt2
+ggplot() + geom_point(aes(x=agtPropUsage$blissPoint,y=agtPropUsage$googPct),alpha=.1) + geom_line(aes(x=blissX,y=mnGoog),color="#34a853",size=1) + xlab("Bliss Point") + ylab("% Google Usage") + ggtitle("Moving Average") -> plt2
 ggarrange(plt1,plt2,nrow=1,ncol=2)
 
 
@@ -102,7 +119,12 @@ cbind(rep(1,length(blissRange)),blissRange,rep(1,length(blissRange))) %*% matrix
 yHatEnoVPN <- (.01+exp(yHatnoVPN))/(1+exp(yHatnoVPN))
 yHatEVPN <- (.01+exp(yHatVPN))/(1+exp(yHatVPN))
 
-ggplot() + geom_point(aes(x=agtPropUsageVPN$blissPoint,y=agtPropUsageVPN$googPct,color=agtPropUsageVPN$optOut),alpha=.1) + geom_line(aes(x=blissRange,y=yHatEnoVPN),color="red") + geom_line(aes(x=blissRange,y=yHatEVPN),color="blue") + xlab("Bliss Point") + ylab("Google Usage") + labs(color = "VPN") + ggtitle("Modified Logit") -> plt1
+data.frame(c(blissRange,blissRange),c(yHatEnoVPN,yHatEVPN),c(rep("False",length(blissRange)),rep("True",length(blissRange)))) -> ggFrame1
+names(ggFrame1) <- c("blissRng","googPct","vpn")
+ggFrame1$vpn <- as.factor(ggFrame1$vpn)
+
+
+ggplot() + geom_point(aes(x=agtPropUsageVPN$blissPoint,y=agtPropUsageVPN$googPct,color=agtPropUsageVPN$optOut),alpha=.1) + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$vpn)) + scale_color_manual(values = c("False" = "#4285f4", "True" = "#ea4335")) + xlab("Bliss Point") + ylab("Google Usage") + labs(color = "VPN") + ggtitle("Modified Logit") -> plt1
 
 #ggplot() + geom_point(aes(x=agtPropUsageVPN$blissPoint,y=agtPropUsageVPN$googPct,color=agtPropUsageVPN$optOut),alpha=.1) + geom_line(aes(x=blissRange,y=yHatEnoVPN),color="red") + geom_line(aes(x=blissRange,y=yHatEVPN),color="blue") + ylim(.45,.8)
 
@@ -121,7 +143,13 @@ for (k in 1:(length(rng)-1)){
   
 }
 
-ggplot() + geom_point(aes(x=agtPropUsageVPN$blissPoint,y=agtPropUsageVPN$googPct,color=agtPropUsageVPN$optOut),alpha=.1) + geom_line(aes(x=blissX,y=mnNoVPN),color="red") + geom_line(aes(x=blissX,y=mnVPN),color="blue") + xlab("Bliss Point") + ylab("% Google Usage") + ggtitle("Moving Average") + labs(color = "VPN")-> plt2
+data.frame(c(blissX,blissX),c(mnNoVPN,mnVPN),c(rep("False",length(blissX)),rep("True",length(blissX)))) -> ggFrame2
+names(ggFrame2) <- c("blissRng","googPct","vpn")
+ggFrame2$vpn <- as.factor(ggFrame2$vpn)
+
+ggplot() + geom_point(aes(x=agtPropUsageVPN$blissPoint,y=agtPropUsageVPN$googPct,color=agtPropUsageVPN$optOut),alpha=.1) + 
+  geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$vpn)) + scale_color_manual(values = c("False" = "#4285f4", "True" = "#ea4335")) + 
+  xlab("Bliss Point") + ylab("% Google Usage") + ggtitle("Moving Average") + labs(color = "VPN")-> plt2
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom")
 
 # NOW STUDY AGENT'S TENDENCY TO USE VPNS
@@ -144,7 +172,7 @@ cbind(rep(1,length(blissRange)),blissRange) %*% matrix(centerVPNMod$coefficients
 
 vpnYE <- (.01+exp(vpnY))/(1+exp(vpnY))
 
-ggplot() + geom_point(aes(x=vpnBliss$blissPoint,y=vpnBliss$optPct,color=vpnBliss$googPct),alpha=.1) + geom_line(aes(x=blissRange,y=vpnYE),color="red") + xlab("Bliss Point") + ylab("% VPN Usage") + labs(color="Google %") + ggtitle("Modified Logit") -> plt1
+ggplot() + geom_point(aes(x=vpnBliss$blissPoint,y=vpnBliss$optPct,color=100*vpnBliss$googPct),alpha=.1) + scale_color_gradient(low = "#E37151", high = "#34a853")  + geom_line(aes(x=blissRange,y=vpnYE),color="#434c5e") + xlab("Bliss Point") + ylab("% VPN Usage") + labs(color="Google %") + ggtitle("Modified Logit") -> plt1
 
 window <- .5
 seq(min(vpnBliss$blissPoint),max(vpnBliss$blissPoint),by=window) -> rng
@@ -160,7 +188,7 @@ for (k in 1:(length(rng)-1)){
   
 }
 
-ggplot() + geom_point(aes(x=vpnBliss$blissPoint,y=vpnBliss$optPct,color=vpnBliss$googPct),alpha=.1) + geom_line(aes(x=blissX,y=mnVPN),color="red") + xlab("Bliss Point") + ylab("% VPN Usage") + ggtitle("Moving Average") + labs(color = "Google %")-> plt2
+ggplot() + geom_point(aes(x=vpnBliss$blissPoint,y=vpnBliss$optPct,color=100*vpnBliss$googPct),alpha=.1) + scale_color_gradient(low = "#E37151", high = "#34a853") + geom_line(aes(x=blissX,y=mnVPN),color="#434c5e") + xlab("Bliss Point") + ylab("% VPN Usage") + ggtitle("Moving Average") + labs(color = "Google %")-> plt2
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom")
 
 
@@ -183,8 +211,10 @@ cbind(rep(1,length(blissRange)),blissRange,rep(1,length(blissRange))) %*% matrix
 duckVPNE <- (.01+exp(duckVPN))/(1+exp(duckVPN))
 googVPNE <- (.01+exp(googVPN))/(1+exp(googVPN))
 
-
-ggplot() + geom_point(aes(x=vpnEngineBliss$blissPoint,y=vpnEngineBliss$optPct,color=vpnEngineBliss$googBool),alpha=.1) + geom_line(aes(x=blissRange,y=duckVPNE),color="red")  + geom_line(aes(x=blissRange,y=googVPNE),color="green") + xlab("Bliss Point") + ylab("VPN Usage %") + labs(color="Google User") + ggtitle("Modified Logit") -> plt1
+data.frame(c(blissRange,blissRange),c(duckVPNE,googVPNE),c(rep("Duck Duck Go",length(duckVPNE)),rep("Google",length(googVPNE)))) -> ggFrame1
+names(ggFrame1) <- c("blissPoint","vpnPct","engine") 
+ggplot() + geom_point(aes(x=vpnEngineBliss$blissPoint,y=vpnEngineBliss$optPct,color=vpnEngineBliss$googBool),alpha=.1) + geom_line(aes(x=ggFrame1$blissPoint,y=ggFrame1$vpnPct,color=ggFrame1$engine)) +
+  scale_color_manual(values = c("Google" = "#4285f4", "Duck Duck Go" = "#333333")) + xlab("Bliss Point") + ylab("VPN Usage %") + labs(color="Search Engine") + ggtitle("Modified Logit") -> plt1
 
 window <- .5
 seq(min(vpnEngineBliss$blissPoint),max(vpnEngineBliss$blissPoint),by=window) -> rng
@@ -200,7 +230,11 @@ for (k in 1:(length(rng)-1)){
   mnVPNDuck <- c(mnVPNDuck,mean(vpnEngineBliss[vpnEngineBliss$currEngine=="duckDuckGo" & vpnEngineBliss$blissPoint >= rng[k] & vpnEngineBliss$blissPoint < rng[k+1],"optPct"]))
 }
 
-ggplot() + geom_point(aes(x=vpnEngineBliss$blissPoint,y=vpnEngineBliss$optPct,color=vpnEngineBliss$googBool),alpha=.1) + geom_line(aes(x=blissX,y=mnVPNDuck),color="red") + geom_line(aes(x=blissX,y=mnVPNGoog),color="green")  + xlab("Bliss Point") + ylab("% VPN Usage") + ggtitle("Moving Average") + labs(color = "Google %")-> plt2
+data.frame(c(blissX,blissX),c(mnVPNDuck,mnVPNGoog),c(rep("Duck Duck Go",length(mnVPNDuck)),rep("Google",length(mnVPNGoog)))) -> ggFrame2
+names(ggFrame2) <- c("blissPoint","vpnPct","engine") 
+
+ggplot() + geom_point(aes(x=vpnEngineBliss$blissPoint,y=vpnEngineBliss$optPct,color=vpnEngineBliss$googBool),alpha=.1) + 
+  geom_line(aes(x=ggFrame2$blissPoint,y=ggFrame2$vpnPct,color=ggFrame2$engine)) + scale_color_manual(values = c("Google" = "#4285f4", "Duck Duck Go" = "#333333"))  + xlab("Bliss Point") + ylab("% VPN Usage") + ggtitle("Moving Average") + labs(color = "Google %") -> plt2
 
 # THIS PLOT ESTABLISHES VPN BEHAVIOR IS DIFFERENT BY SEARCH ENGINE CHOICE AND BLISS POINT
 
@@ -276,9 +310,9 @@ ggplot() + geom_point(aes(x=afterVPNSmryAgt$blissPoint,y=afterVPNSmryAgt$googPct
   geom_line(aes(x=blissX,y=mnVPN50),color="red") + geom_line(aes(x=blissX,y=mnVPN95),color="green") + ggtitle("Moving Average")-> plt2
 
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom")
+## no need to format these, nothing interesting
 
 
-### HERE I STOPPED ##
 
 # now, let's do similar analysis for when Duck Duck Go is introduced before the VPN. 
 outDat[outDat$vpnTick!=-10 & outDat$duckTick!=-10 & outDat$vpnTick > outDat$duckTick & outDat$tick >= (outDat$vpnTick+25),] -> afterDuck2
@@ -332,7 +366,7 @@ for (k in 1:(length(rng)-1)){
 
 ggplot() + geom_point(aes(x=afterDuck2VPNAgt$blissPoint,y=afterDuck2VPNAgt$googPct,color=as.factor(afterDuck2VPNAgt$tickDelta)),alpha=.1) + xlab("Bliss Point") + ylab("Google Usage %") + labs(color="Duck Duck Go Lag") + geom_line(aes(x=blissX,y=lag10),color="black") +
   geom_line(aes(x=blissX,y=lag40),color="red") + geom_line(aes(x=blissX,y=lag100),color="green") + ggtitle("Moving Average") -> plt2
-
+# again, nothing interesting here
 
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom")
 
@@ -379,21 +413,7 @@ afterShare %>% transform(googBool=(currEngine=="google")) %>% group_by(key,share
 
 merge(shareSmry,agentDat,by=c("key","agent")) -> agtShareSmry
 
-# we need a modified logit function
 
-mLogit <-function(arg){
-  return(log((arg+.01)/(1-arg+.01)))
-}
-
-invLogit <- function(arg){
-  return((.01+exp(arg))/(1+exp(arg)))
-}
-
-# we need a function that gives the bliss range 
-
-blissRangeFunc <- function(blissData){
-  return(seq(min(blissData),max(blissData),by=0.05))
-}
 
 unique(agtShareSmry$shareAvail)
 lm(mLogit(agtShareSmry$googPct)~agtShareSmry$blissPoint +  (agtShareSmry$shareAvail)) -> lMod
@@ -410,9 +430,14 @@ deltaDeltaShare %*% lMod$coefficients -> yHatYes
 yHatENo <- (.01+exp(yHatNo))/(1+exp(yHatNo))
 yHatEYes <- (.01+exp(yHatYes))/(1+exp(yHatYes))
 
+data.frame(c(blissRng,blissRng),c(yHatENo,yHatEYes),c(rep("False",length(blissRng)),rep("True",length(blissRng)))) -> ggFrame1
+names(ggFrame1) <-  c("blissRng","googPct","sharing")
+
+ggFrame1$sharing <- as.factor(ggFrame1$sharing)
 
 
-ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1) + geom_line(aes(x=blissRng,y=yHatENo),color="blue") + geom_line(aes(x=blissRng,y=yHatEYes),color="red")  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Duck Duck Go Lag") + ggtitle("Modified Logit") -> plt1
+
+ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1) + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$sharing)) + scale_color_manual(values = c("False" = "#4285f4", "True" = "#ea4335"))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Sharing Law") + ggtitle("Modified Logit") -> plt1
 
 # now get the smoothing
 
@@ -431,7 +456,14 @@ for (k in 1:(length(rng)-1)){
   Sharing <- c(Sharing,mean(agtShareSmry[agtShareSmry$shareAvail & agtShareSmry$blissPoint >= rng[k] & agtShareSmry$blissPoint < rng[k+1],"googPct"]))
 }
 
-ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1) + xlab("Bliss Point") + ylab("Google Usage %") + labs(color="Duck Duck Go Lag") + geom_line(aes(x=blissX,y=noSharing),color="blue")+ geom_line(aes(x=blissX,y=Sharing),color="red")   + ggtitle("Moving Average") -> plt2
+data.frame(c(blissX,blissX),c(noSharing,Sharing),c(rep("False",length(blissX)),rep("True",length(blissX)))) -> ggFrame2
+names(ggFrame2) <-  c("blissRng","googPct","sharing")
+
+ggFrame2$sharing <- as.factor(ggFrame2$sharing)
+
+
+
+ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1) + xlab("Bliss Point") + ylab("Google Usage %") + labs(color="Sharing") + geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$sharing)) + scale_color_manual(values = c("False" = "#4285f4", "True" = "#ea4335"))   + ggtitle("Moving Average") -> plt2
 
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom")
 
