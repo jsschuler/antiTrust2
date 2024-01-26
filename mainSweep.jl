@@ -37,7 +37,7 @@ for k in (t+1):(t+cores)
 end
 ctrlFrame.initialized=initialVec
 
-@save "ctrl.jld2"
+@save "ctrl.jld2" ctrlFrame
 
 
 @everywhere paramVec=[]

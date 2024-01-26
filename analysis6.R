@@ -14,6 +14,21 @@ library(ggpubr)
 library(dplyr)
 library(rlist)
 
+# template
+googColor <- "#34a853"
+#basePoint <- "white"
+#bgFill <- "black"
+basePoint <- "black"
+bgFill <- "white"
+vpnTrue <- "#4285f4"
+vpnFalse <- "#ea4335"
+hiOrange <- "#E37151"
+shareColor <- "#ffa700"
+#vpnColor <- "vpnColor"
+vpnColor <- "purple"
+
+
+
 # we need a modified logit function
 
 mLogit <-function(arg){
@@ -90,15 +105,17 @@ yHatE <- (.01+exp(yHat))/(1+exp(yHat))
 # NOTE THESE AGENTS DO NOT HAVE VPN ACCESS
 
 
-ggplot() + geom_point(aes(x=agtPropUsage$blissPoint,y=agtPropUsage$googPct),alpha=.1,color="white") + geom_line(aes(x=xRng,y=yHatE),color="#34a853",size=1) + xlab("Bliss Point") + ylab("Google Usage") + ggtitle("Modified Logit") + theme(
-  panel.background = element_rect(fill = "black"),
-  plot.title = element_text(color = "white",hjust = 0.5),
-  plot.background = element_rect(fill = "black"),
+
+
+ggplot() + geom_point(aes(x=agtPropUsage$blissPoint,y=agtPropUsage$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=xRng,y=yHatE),color=googColor,size=1) + xlab("Bliss Point") + ylab("Google Usage") + ggtitle("Modified Logit") + theme(
+  panel.background = element_rect(fill = bgFill),
+  plot.title = element_text(color =basePoint,hjust = 0.5),
+  plot.background = element_rect(fill = bgFill),
   panel.grid = element_blank(),
-  axis.text = element_text(color = "white"),
-  axis.title = element_text(color = "white"),
-  legend.background = element_rect(fill = "black"),
-  legend.text = element_text(color = "white")) -> plt1
+  axis.text = element_text(color =basePoint),
+  axis.title = element_text(color =basePoint),
+  legend.background = element_rect(fill = bgFill),
+  legend.text = element_text(color =basePoint)) -> plt1
 
 
 window <- .5
@@ -111,17 +128,21 @@ for (k in 1:(length(rng)-1)){
   mnGoog <- c(mnGoog,mean(agtPropUsage[agtPropUsage$blissPoint >= rng[k] & agtPropUsage$blissPoint < rng[k+1] ,"googPct"]))
 }
 
-ggplot() + geom_point(aes(x=agtPropUsage$blissPoint,y=agtPropUsage$googPct),alpha=.1,color="white") + geom_line(aes(x=blissX,y=mnGoog),color="#34a853",size=1) + xlab("Bliss Point") + ylab("% Google Usage") + ggtitle("Moving Average") + theme(
-  panel.background = element_rect(fill = "black"),
-  plot.title = element_text(color = "white",hjust = 0.5),
-  plot.background = element_rect(fill = "black"),
+ggplot() + geom_point(aes(x=agtPropUsage$blissPoint,y=agtPropUsage$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=blissX,y=mnGoog),color=googColor,size=1) + xlab("Bliss Point") + ylab("% Google Usage") + ggtitle("Moving Average") + theme(
+  panel.background = element_rect(fill = bgFill),
+  plot.title = element_text(color =basePoint,hjust = 0.5),
+  plot.background = element_rect(fill = bgFill),
   panel.grid = element_blank(),
-  axis.text = element_text(color = "white"),
-  axis.title = element_text(color = "white"),
-  legend.background = element_rect(fill = "black"),
-  legend.text = element_text(color = "white")) -> plt2
+  axis.text = element_text(color =basePoint),
+  axis.title = element_text(color =basePoint),
+  legend.background = element_rect(fill = bgFill),
+  legend.text = element_text(color =basePoint)) -> plt2
 ggarrange(plt1,plt2,nrow=1,ncol=2)
-ggsave(filename = "~/ResearchCode/antiTrustImages/basic.png",width=7,height=7,bg="black")
+ggsave(filename = "~/ResearchCode/antiTrustImages/basic.png",width=7,height=7,bg=bgFill)
+
+# now examine the mixing speed 
+
+
 
 #### VPN ACCESS 
 
@@ -155,17 +176,17 @@ substr(agtPropUsageVPN$optOut,1,1) <- toupper(substr(agtPropUsageVPN$optOut,1,1)
 
 
 ggplot() + geom_point(aes(x=agtPropUsageVPN$blissPoint,y=agtPropUsageVPN$googPct,color=agtPropUsageVPN$optOut),alpha=.1)  + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$vpn),size=1) + 
-  scale_color_manual(values = c("False" = "#4285f4", "True" = "#ea4335")) + xlab("Bliss Point") + ylab("Google Usage") + labs(color = "VPN") + ggtitle("Modified Logit") + theme(
-  panel.background = element_rect(fill = "black"),
-  plot.title = element_text(color = "white",hjust = 0.5),
-  plot.background = element_rect(fill = "black"),
+  scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse)) + xlab("Bliss Point") + ylab("Google Usage") + labs(color = "VPN") + ggtitle("Modified Logit") + theme(
+  panel.background = element_rect(fill = bgFill),
+  plot.title = element_text(color =basePoint,hjust = 0.5),
+  plot.background = element_rect(fill = bgFill),
   panel.grid = element_blank(),
-  axis.text = element_text(color = "white"),
-  axis.title = element_text(color = "white"),
-  legend.background = element_rect(fill = "black",color="black"),
-  legend.key = element_rect(fill = "black", colour = "black"),
-  legend.text = element_text(color = "white"),
-  legend.title = element_text(color = "white")) -> plt1
+  axis.text = element_text(color =basePoint),
+  axis.title = element_text(color =basePoint),
+  legend.background = element_rect(fill = bgFill,color=bgFill),
+  legend.key = element_rect(fill = bgFill, colour = bgFill),
+  legend.text = element_text(color =basePoint),
+  legend.title = element_text(color =basePoint)) -> plt1
 
 
 window <- .5
@@ -187,21 +208,21 @@ names(ggFrame2) <- c("blissRng","googPct","vpn")
 #ggFrame2$vpn <- as.factor(ggFrame2$vpn)
 
 ggplot() + geom_point(aes(x=agtPropUsageVPN$blissPoint,y=agtPropUsageVPN$googPct,color=agtPropUsageVPN$optOut),alpha=.1) + 
-  geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$vpn),size=1) + scale_color_manual(values = c("False" = "#4285f4", "True" = "#ea4335")) + 
+  geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$vpn),size=1) + scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse)) + 
   xlab("Bliss Point") + ylab("% Google Usage") + ggtitle("Moving Average") + labs(color = "VPN") + theme(
-    panel.background = element_rect(fill = "black"),
-    plot.title = element_text(color = "white",hjust = 0.5),
-    plot.background = element_rect(fill = "black"),
+    panel.background = element_rect(fill = bgFill),
+    plot.title = element_text(color =basePoint,hjust = 0.5),
+    plot.background = element_rect(fill = bgFill),
     panel.grid = element_blank(),
-    axis.text = element_text(color = "white"),
-    axis.title = element_text(color = "white"),
-    legend.background = element_rect(fill = "black",color="black"),
-    legend.key = element_rect(fill = "black", colour = "black"),
-    legend.text = element_text(color = "white"),
-    legend.title = element_text(color = "white")) -> plt2
+    axis.text = element_text(color =basePoint),
+    axis.title = element_text(color =basePoint),
+    legend.background = element_rect(fill = bgFill,color=bgFill),
+    legend.key = element_rect(fill = bgFill, colour = bgFill),
+    legend.text = element_text(color =basePoint),
+    legend.title = element_text(color =basePoint)) -> plt2
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom") 
 
-ggsave(filename = "~/ResearchCode/antiTrustImages/vpn.png",width=7,height=7,bg="black")
+ggsave(filename = "~/ResearchCode/antiTrustImages/vpn.png",width=7,height=7,bg=bgFill)
 
 
 # NOW STUDY AGENT'S TENDENCY TO USE VPNS
@@ -224,18 +245,18 @@ cbind(rep(1,length(blissRange)),blissRange) %*% matrix(centerVPNMod$coefficients
 
 vpnYE <- (.01+exp(vpnY))/(1+exp(vpnY))
 
-ggplot() + geom_point(aes(x=vpnBliss$blissPoint,y=vpnBliss$optPct,color=100*vpnBliss$googPct),alpha=.1) + scale_color_gradient(low = "#E37151", high = "#34a853")  + geom_line(aes(x=blissRange,y=vpnYE),color="#D3D3D3",size=1) + 
+ggplot() + geom_point(aes(x=vpnBliss$blissPoint,y=vpnBliss$optPct,color=100*vpnBliss$googPct),alpha=.1) + scale_color_gradient(low = hiOrange, high = googColor)  + geom_line(aes(x=blissRange,y=vpnYE),color=vpnColor,size=1) + 
   xlab("Bliss Point") + ylab("% VPN Usage") + labs(color="Google %") + ggtitle("Modified Logit") + theme(
-    panel.background = element_rect(fill = "black"),
-    plot.title = element_text(color = "white",hjust = 0.5),
-    plot.background = element_rect(fill = "black"),
+    panel.background = element_rect(fill = bgFill),
+    plot.title = element_text(color =basePoint,hjust = 0.5),
+    plot.background = element_rect(fill = bgFill),
     panel.grid = element_blank(),
-    axis.text = element_text(color = "white"),
-    axis.title = element_text(color = "white"),
-    legend.background = element_rect(fill = "black",color="black"),
-    legend.key = element_rect(fill = "black", colour = "black"),
-    legend.text = element_text(color = "white"),
-    legend.title = element_text(color = "white")) -> plt1
+    axis.text = element_text(color =basePoint),
+    axis.title = element_text(color =basePoint),
+    legend.background = element_rect(fill = bgFill,color=bgFill),
+    legend.key = element_rect(fill = bgFill, colour = bgFill),
+    legend.text = element_text(color =basePoint),
+    legend.title = element_text(color =basePoint)) -> plt1
 
 window <- .5
 seq(min(vpnBliss$blissPoint),max(vpnBliss$blissPoint),by=window) -> rng
@@ -251,20 +272,20 @@ for (k in 1:(length(rng)-1)){
   
 }
 
-ggplot() + geom_point(aes(x=vpnBliss$blissPoint,y=vpnBliss$optPct,color=100*vpnBliss$googPct),alpha=.1) + scale_color_gradient(low = "#E37151", high = "#34a853") + geom_line(aes(x=blissX,y=mnVPN),color="#D3D3D3",size=1) + 
+ggplot() + geom_point(aes(x=vpnBliss$blissPoint,y=vpnBliss$optPct,color=100*vpnBliss$googPct),alpha=.1) + scale_color_gradient(low = hiOrange, high = googColor) + geom_line(aes(x=blissX,y=mnVPN),color=vpnColor,size=1) + 
   xlab("Bliss Point") + ylab("% VPN Usage") + ggtitle("Moving Average") + labs(color = "Google %") + theme(
-    panel.background = element_rect(fill = "black"),
-    plot.title = element_text(color = "white",hjust = 0.5),
-    plot.background = element_rect(fill = "black"),
+    panel.background = element_rect(fill = bgFill),
+    plot.title = element_text(color =basePoint,hjust = 0.5),
+    plot.background = element_rect(fill = bgFill),
     panel.grid = element_blank(),
-    axis.text = element_text(color = "white"),
-    axis.title = element_text(color = "white"),
-    legend.background = element_rect(fill = "black",color="black"),
-    legend.key = element_rect(fill = "black", colour = "black"),
-    legend.text = element_text(color = "white"),
-    legend.title = element_text(color = "white")) -> plt2
+    axis.text = element_text(color =basePoint),
+    axis.title = element_text(color =basePoint),
+    legend.background = element_rect(fill = bgFill,color=bgFill),
+    legend.key = element_rect(fill = bgFill, colour = bgFill),
+    legend.text = element_text(color =basePoint),
+    legend.title = element_text(color =basePoint)) -> plt2
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom")
-ggsave(filename = "~/ResearchCode/antiTrustImages/vpUsage.png",width=7,height=7,bg="black")
+ggsave(filename = "~/ResearchCode/antiTrustImages/vpnUsage.png",width=7,height=7,bg=bgFill)
 
 
 #### DELETION LAW #####
@@ -336,18 +357,18 @@ ggFrame1$deletion <- as.factor(ggFrame1$deletion)
 
 
 
-ggplot() + geom_point(aes(x=agtDelSmry$blissPoint,y=agtDelSmry$googPct),alpha=.1,color="white") + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$deletion),size=1) + 
-  scale_color_manual(values = c("False" = "#4285f4", "True" = "#ea4335"))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Deletion Law") + ggtitle("Modified Logit") + theme(
-    panel.background = element_rect(fill = "black"),
-    plot.title = element_text(color = "white",hjust = 0.5),
-    plot.background = element_rect(fill = "black"),
+ggplot() + geom_point(aes(x=agtDelSmry$blissPoint,y=agtDelSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$deletion),size=1) + 
+  scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Deletion Law") + ggtitle("Modified Logit") + theme(
+    panel.background = element_rect(fill = bgFill),
+    plot.title = element_text(color =basePoint,hjust = 0.5),
+    plot.background = element_rect(fill = bgFill),
     panel.grid = element_blank(),
-    axis.text = element_text(color = "white"),
-    axis.title = element_text(color = "white"),
-    legend.background = element_rect(fill = "black",color="black"),
-    legend.key = element_rect(fill = "black", colour = "black"),
-    legend.text = element_text(color = "white"),
-    legend.title = element_text(color = "white"))-> plt1
+    axis.text = element_text(color =basePoint),
+    axis.title = element_text(color =basePoint),
+    legend.background = element_rect(fill = bgFill,color=bgFill),
+    legend.key = element_rect(fill = bgFill, colour = bgFill),
+    legend.text = element_text(color =basePoint),
+    legend.title = element_text(color =basePoint)) -> plt1
 
 # now get the smoothing
 
@@ -372,22 +393,22 @@ ggFrame2$deletion <- as.factor(ggFrame2$deletion)
 
 
 
-ggplot() + geom_point(aes(x=agtDelSmry$blissPoint,y=agtDelSmry$googPct),alpha=.1,color="white") + geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$deletion),size=1) + 
-  scale_color_manual(values = c("False" = "#4285f4", "True" = "#ea4335"))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Deletion Law") + 
+ggplot() + geom_point(aes(x=agtDelSmry$blissPoint,y=agtDelSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$deletion),size=1) + 
+  scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Deletion Law") + 
   ggtitle("Moving Average") + theme(
-    panel.background = element_rect(fill = "black"),
-    plot.title = element_text(color = "white",hjust = 0.5),
-    plot.background = element_rect(fill = "black"),
+    panel.background = element_rect(fill = bgFill),
+    plot.title = element_text(color =basePoint,hjust = 0.5),
+    plot.background = element_rect(fill = bgFill),
     panel.grid = element_blank(),
-    axis.text = element_text(color = "white"),
-    axis.title = element_text(color = "white"),
-    legend.background = element_rect(fill = "black",color="black"),
-    legend.key = element_rect(fill = "black", colour = "black"),
-    legend.text = element_text(color = "white"),
-    legend.title = element_text(color = "white")) -> plt2
+    axis.text = element_text(color =basePoint),
+    axis.title = element_text(color =basePoint),
+    legend.background = element_rect(fill = bgFill,color=bgFill),
+    legend.key = element_rect(fill = bgFill, colour = bgFill),
+    legend.text = element_text(color =basePoint),
+    legend.title = element_text(color =basePoint)) -> plt2
 
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom")
-ggsave(filename = "~/ResearchCode/antiTrustImages/deletion.png",width=7,height=7,bg="black")
+ggsave(filename = "~/ResearchCode/antiTrustImages/deletion.png",width=7,height=7,bg=bgFill)
 ##### SHARING RULES #####
 
 setwd("~/ResearchCode/antiTrustDataShare")
@@ -454,18 +475,18 @@ ggFrame1$sharing <- as.factor(ggFrame1$sharing)
 
 
 
-ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1,color="white") + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$sharing),size=1) + 
-  scale_color_manual(values = c("False" = "#4285f4", "True" = "#ea4335"))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Sharing Law") + ggtitle("Modified Logit")+ theme(
-    panel.background = element_rect(fill = "black"),
-    plot.title = element_text(color = "white",hjust = 0.5),
-    plot.background = element_rect(fill = "black"),
+ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$sharing),size=1) + 
+  scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Sharing Law") + ggtitle("Modified Logit")+ theme(
+    panel.background = element_rect(fill = bgFill),
+    plot.title = element_text(color =basePoint,hjust = 0.5),
+    plot.background = element_rect(fill = bgFill),
     panel.grid = element_blank(),
-    axis.text = element_text(color = "white"),
-    axis.title = element_text(color = "white"),
-    legend.background = element_rect(fill = "black",color="black"),
-    legend.key = element_rect(fill = "black", colour = "black"),
-    legend.text = element_text(color = "white"),
-    legend.title = element_text(color = "white"))  -> plt1
+    axis.text = element_text(color =basePoint),
+    axis.title = element_text(color =basePoint),
+    legend.background = element_rect(fill = bgFill,color=bgFill),
+    legend.key = element_rect(fill = bgFill, colour = bgFill),
+    legend.text = element_text(color =basePoint),
+    legend.title = element_text(color =basePoint))  -> plt1
 
 # now get the smoothing
 
@@ -491,18 +512,18 @@ ggFrame2$sharing <- as.factor(ggFrame2$sharing)
 
 
 
-ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1,color="white") + xlab("Bliss Point") + ylab("Google Usage %") + labs(color="Sharing") + 
-  geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$sharing),size=1) + scale_color_manual(values = c("False" = "#4285f4", "True" = "#ea4335"))   + ggtitle("Moving Average") + theme(
-    panel.background = element_rect(fill = "black"),
-    plot.title = element_text(color = "white",hjust = 0.5),
-    plot.background = element_rect(fill = "black"),
+ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1,color=basePoint) + xlab("Bliss Point") + ylab("Google Usage %") + labs(color="Sharing") + 
+  geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$sharing),size=1) + scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse))   + ggtitle("Moving Average") + theme(
+    panel.background = element_rect(fill = bgFill),
+    plot.title = element_text(color =basePoint,hjust = 0.5),
+    plot.background = element_rect(fill = bgFill),
     panel.grid = element_blank(),
-    axis.text = element_text(color = "white"),
-    axis.title = element_text(color = "white"),
-    legend.background = element_rect(fill = "black",color="black"),
-    legend.key = element_rect(fill = "black", colour = "black"),
-    legend.text = element_text(color = "white"),
-    legend.title = element_text(color = "white")) -> plt2
+    axis.text = element_text(color =basePoint),
+    axis.title = element_text(color =basePoint),
+    legend.background = element_rect(fill = bgFill,color=bgFill),
+    legend.key = element_rect(fill = bgFill, colour = bgFill),
+    legend.text = element_text(color =basePoint),
+    legend.title = element_text(color =basePoint)) -> plt2
 
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom")
 ggsave(filename = "~/ResearchCode/antiTrustImages/sharing.png",width=7,height=7)
@@ -587,18 +608,18 @@ names(ggFrame1) <-  c("blissRng","googPct","order")
 
 
 
-ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1,color="white") + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$order),size=1) + 
-  scale_color_manual(values = c("Simultaneous" = "#4285f4", "Deletion First" = "#ea4335","Sharing First"="#ffa700"))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Order") + ggtitle("Modified Logit")+ theme(
-    panel.background = element_rect(fill = "black"),
-    plot.title = element_text(color = "white",hjust = 0.5),
-    plot.background = element_rect(fill = "black"),
+ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$order),size=1) + 
+  scale_color_manual(values = c("Simultaneous" = vpnTrue, "Deletion First" = vpnFalse,"Sharing First"=shareColor))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Order") + ggtitle("Modified Logit")+ theme(
+    panel.background = element_rect(fill = bgFill),
+    plot.title = element_text(color =basePoint,hjust = 0.5),
+    plot.background = element_rect(fill = bgFill),
     panel.grid = element_blank(),
-    axis.text = element_text(color = "white"),
-    axis.title = element_text(color = "white"),
-    legend.background = element_rect(fill = "black",color="black"),
-    legend.key = element_rect(fill = "black", colour = "black"),
-    legend.text = element_text(color = "white"),
-    legend.title = element_text(color = "white"))  -> plt1
+    axis.text = element_text(color =basePoint),
+    axis.title = element_text(color =basePoint),
+    legend.background = element_rect(fill = bgFill,color=bgFill),
+    legend.key = element_rect(fill = bgFill, colour = bgFill),
+    legend.text = element_text(color =basePoint),
+    legend.title = element_text(color =basePoint))  -> plt1
 
 # now get the smoothing
 
@@ -626,18 +647,21 @@ names(ggFrame2) <-  c("blissRng","googPct","order")
 
 
 
-ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1,color="white") + geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$order),size=1) + 
-  scale_color_manual(values = c("Simultaneous" = "#4285f4", "Deletion First" = "#ea4335","Sharing First"="#ffa700"))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Order") + ggtitle("Moving Average")+ theme(
-    panel.background = element_rect(fill = "black"),
-    plot.title = element_text(color = "white",hjust = 0.5),
-    plot.background = element_rect(fill = "black"),
+ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$order),size=1) + 
+  scale_color_manual(values = c("Simultaneous" = vpnTrue, "Deletion First" = vpnFalse,"Sharing First"=shareColor))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Order") + ggtitle("Moving Average")+ theme(
+    panel.background = element_rect(fill = bgFill),
+    plot.title = element_text(color =basePoint,hjust = 0.5),
+    plot.background = element_rect(fill = bgFill),
     panel.grid = element_blank(),
-    axis.text = element_text(color = "white"),
-    axis.title = element_text(color = "white"),
-    legend.background = element_rect(fill = "black",color="black"),
-    legend.key = element_rect(fill = "black", colour = "black"),
-    legend.text = element_text(color = "white"),
-    legend.title = element_text(color = "white"))  -> plt2
+    axis.text = element_text(color =basePoint),
+    axis.title = element_text(color =basePoint),
+    legend.background = element_rect(fill = bgFill,color=bgFill),
+    legend.key = element_rect(fill = bgFill, colour = bgFill),
+    legend.text = element_text(color =basePoint),
+    legend.title = element_text(color =basePoint))  -> plt2
 
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom")
-ggsave(filename = "~/ResearchCode/antiTrustImages/sharing.png",width=7,height=7)
+ggsave(filename = "~/ResearchCode/antiTrustImages/sharingDeletion.png",width=7,height=7)
+
+
+
