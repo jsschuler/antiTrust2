@@ -1,7 +1,7 @@
 
-setwd("~/ResearchCode/antiTrustNetwork")
-read.csv("ctrl.csv",sep=",") -> control
-list.files("~/ResearchCode/antiTrustDataVPN") -> allFi
+setwd("~/ResearchCode/antiTrustNetworkData")
+read.csv("~/ResearchCode/antiTrustNetworkData/ctrl.csv",sep=",") -> control
+list.files("~/ResearchCode/antiTrustNetworkData") -> allFi
 
 outList <- list()
 searchList <- list()
@@ -30,10 +30,15 @@ names(afterDat) <- c("key","tick","agent","act","engine","result")
 list.rbind(agentList) -> agentDat
 names(agentDat) <- c("key","agent","blissPoint","selfExp","unifExp")
 
+read.csv()
+
 # step one, consider only cases where there is no vpn
 # and only consider data where Duck Duck Go has been available
 outDat[outDat$tick >= (outDat$duckTick) & outDat$vpnTick==-10 & outDat$delTick==-10 & outDat$shareTick==-10,] -> afterDuckImm
 afterDuckImm$tickSince <- afterDuckImm$tick-afterDuckImm$duckTick
+
+
+control[,c("key","expDegree")] -> paramFi
 
 afterDuckImm %>% transform(googBool=(currEngine=="google")) %>% group_by(key,tickSince) %>% summarize(googPct=100*mean(googBool)) %>% group_by(tickSince) %>% summarize(goog75=quantile(googPct,.75),
                                                                                                                                                                     #googMn=mean(googPct),
@@ -43,6 +48,20 @@ afterDuckImm %>% transform(googBool=(currEngine=="google")) %>% group_by(key,tic
                                                                                                                                                                       names_to = "Variable",
                                                                                                                                                                       values_to = "Value"
                                                                                                                                                                     )-> mixSmry
+afterDuckImm %>% transform(googBool=(currEngine=="google")) %>% group_by(key,tickSince) %>% summarize(googPct=100*mean(googBool)) -> series
+series %>% group_by(key) %>% summarise(finGoog=min(googPct)) -> serMin
+merge(series,serMin,by="key") -> seriesJoint
+
+seriesJoint$minFlag <- abs(seriesJoint$googPct-seriesJoint$finGoog)<=5 
+seriesJoint %>% group_by(key,minFlag) %>% summarise(minTick=min(tickSince)) -> deltaTick
+deltaTick[deltaTick$minFlag,] -> timeSince
+
+merge(paramFi,timeSince,by="key") -> paramTime
+
+ggplot() + geom_point(aes(x=paramTime$expDegree,paramTime$minTick),color=as.numeric(paramTime$minTick))
+
+lm(paramTime$minTick~paramTime$expDegree)
+
 labelShift <- function(lab){
   if (lab=="goog25"){outLab="25th"}
   if (lab=="goog50"){outLab="50th"}
