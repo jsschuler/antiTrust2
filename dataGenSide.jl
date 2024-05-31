@@ -20,11 +20,11 @@ using Combinatorics
 # now Step 1: Generate the control structure
 
 sweeps=20
-reps=5
+reps=10
 
 # generate a seed 
-seed1Vec=sort(repeat(rand(DiscreteUniform(1,10000),sweeps),reps))
-seed2Vec=rand(DiscreteUniform(1,10000),sweeps*reps)
+seed1Vec=sort(repeat(rand(DiscreteUniform(1,1000000),sweeps),reps))
+seed2Vec=rand(DiscreteUniform(1,1000000),sweeps*reps)
 
 # how many agents care a lot about privacy?
 # higher value means fewer care 
@@ -88,6 +88,10 @@ sharFrame=DataFrame(:sharingTick => sharingTick)
 #tickFrame=crossjoin(duckFrame,vpnFrame)
 #tickFrame=crossjoin(duckFrame,vpnFrame,delFrame)
 tickFrame=crossjoin(duckFrame,vpnFrame,delFrame,sharFrame)
+# now remove any row with more than one Tick of 50
+tickFrame.totTick=tickFrame.vpnTick + tickFrame.deletionTick + tickFrame.sharingTick
+
+tickFrame=tickFrame[tickFrame.totTick.==30 .|| tickFrame.totTick.==-30,:]
 
 #tickFrame[!,"vpnTick"].=-10
 #tickFrame[!,"deletionTick"].=-10
@@ -95,9 +99,9 @@ tickFrame=crossjoin(duckFrame,vpnFrame,delFrame,sharFrame)
 
 
 ctrlFrame=crossjoin(ctrlFrame,tickFrame)
-ctrlFrame.seed2=rand(DiscreteUniform(1,10000),size(ctrlFrame)[1])
+#ctrlFrame.seed2=rand(DiscreteUniform(1,10000),size(ctrlFrame)[1])
 ctrlFrame.key=ctrlFrame.key.*string.(1:size(ctrlFrame)[1])
 ctrlFrame[!,"initialized"]=repeat([false],size(ctrlFrame)[1])
-CSV.write("../antiTrustData/ctrl.csv", ctrlFrame,header = true,append=true)
+CSV.write("../antiTrustData/ctrl.csv", ctrlFrame,header = true,append=false)
 # now save it as JLD2
 @save "ctrl.jld2" ctrlFrame
