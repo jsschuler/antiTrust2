@@ -32,7 +32,7 @@ for el in initialVec
         t=t+1
     end
 end
-for k in (t+1):(t+cores)
+for k in (t+1):(t+1 + remainingCount)
     initialVec[k]=true
 end
 ctrlFrame.initialized=initialVec
@@ -70,6 +70,9 @@ end
         return :rowLoad
     end
 end    
+
+# if I alter the above function to throw off a complete symbol, then I can solve the breakage problem
+
 @everywhere key=""
 # first division, either the process is done or it isn,t
 coreDict=Dict()
@@ -143,7 +146,6 @@ while true
                 coreDict[c]=@spawnat c include("modelMain.jl")
             elseif resultDict[c]==:complete
                 println("Marking Complete")
-                
                 coreDict[c]=:end
             end
         end

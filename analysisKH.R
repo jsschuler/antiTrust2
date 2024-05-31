@@ -87,7 +87,7 @@ control$fullSeed <- paste0(control$seed1,"-",control$seed2)
 
 
 
-
+outDat %>% group_by(key) %>% summarize(tick=max(tick))
 
 # remove all data before tick 60
 outDat <- outDat[outDat$tick >= 200,]
@@ -105,14 +105,8 @@ vpnDat <- finDat[finDat$runType==1,]
 delDat <- finDat[finDat$runType==2,]
 shareDat <- finDat[finDat$runType==4,]
 
-#names(baseDat)[5:7] <- paste0(names(baseDat)[5:7],"Base")
-#names(vpnDat)[5:7] <- paste0(names(baseDat)[5:7],"Vpn")
-#names(delDat)[5:7] <- paste0(names(baseDat)[5:7],"Del")
-#names(shareDat)[5:7] <- paste0(names(baseDat)[5:7],"Share")
 
-merge(baseDat,vpnDat,by=c("seed1","seed2")) -> vpnDat
-merge(baseDat,delDat,by=c("seed1","seed2")) -> delDat
-merge(baseDat,shareDat,by=c("seed1","seed2")) -> shareDat
+
 
 ggplot()+ geom_histogram(aes(x=finDat$googPct,fill=as.factor(finDat$runType)),alpha=.4) + xlab("% of Searches on Google") + ylab("Count")
 cbind(c("Base","VPN","Deletion","Share"),rbind(
@@ -120,3 +114,27 @@ quantile(baseDat$googPct,c(.01,.05,.25,.5,.75,.95,.99)),
 quantile(vpnDat$googPct,c(.01,.05,.25,.5,.75,.95,.99)),
 quantile(delDat$googPct,c(.01,.05,.25,.5,.75,.95,.99)),
 quantile(shareDat$googPct,c(.01,.05,.25,.5,.75,.95,.99))))
+
+
+
+
+names(baseDat)[5:8] <- paste0(names(baseDat)[5:8],"Base")
+names(vpnDat)[5:8] <- paste0(names(baseDat)[5:8],"Vpn")
+names(delDat)[5:8] <- paste0(names(baseDat)[5:8],"Del")
+names(shareDat)[5:8] <- paste0(names(baseDat)[5:8],"Share")
+
+merge(baseDat,vpnDat,by=c("seed1","seed2")) -> vpnBase
+merge(baseDat,delDat,by=c("seed1","seed2")) -> delBase
+merge(baseDat,shareDat,by=c("seed1","seed2")) -> shareBase
+
+vpnBase$delta <- vpnBase$googPctBaseVpn-vpnBase$googPctBase
+delBase$delta <- delBase$googPctBaseDel - delBase$googPctBase
+shareBase$delta <- shareBase$googPctBaseShare - shareBase$googPctBase
+
+ggplot() + geom_histogram(aes(x=vpnBase$delta)) + ggtitle("VPN") + xlab("VPN - Base")
+ggplot() + geom_histogram(aes(x=delBase$delta)) + ggtitle("Deletion") + xlab("Deletion - Base")
+ggplot() + geom_histogram(aes(x=shareBase$delta)) + ggtitle("Sharing") + xlab("Sharing - Base")
+
+# follow up
+# study these gaps as a function of privacy parameter of the population. This will require additonal model runs. 
+
