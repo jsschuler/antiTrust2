@@ -19,7 +19,7 @@ using Combinatorics
 
 # now Step 1: Generate the control structure
 
-sweeps=20
+sweeps=15
 reps=10
 
 # generate a seed 
@@ -28,8 +28,8 @@ seed2Vec=rand(DiscreteUniform(1,1000000),sweeps*reps)
 
 # how many agents care a lot about privacy?
 # higher value means fewer care 
-#privacyValVec=sort(repeat(rand(Uniform(.1,.1),sweeps),reps))
-privacyValVec=repeat([.1],sweeps*reps)
+privacyValVec=sort(repeat(rand(Uniform(.1,1),sweeps),reps))
+#privacyValVec=repeat([.1],sweeps*reps)
 #privacyBeta=Beta.(1.0,privacyVal)
 # how close does the offered search result have to be before the agent accepts it?
 searchResolutionVec=repeat([.05],sweeps*reps)

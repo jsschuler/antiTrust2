@@ -47,8 +47,11 @@ counter=0
 function firstRow()
     global workingFrame
     global counter
-    counter=counter+1
-    return workingFrame[counter,:]
+    if size(workingFrame)[1] <= counter 
+        counter=counter+1
+        return workingFrame[counter,:]
+    else
+        return :complete
 end
 
 # two things left:
