@@ -27,9 +27,9 @@ shareColor <- "#ffa700"
 #vpnColor <- "vpnColor"
 vpnColor <- "purple"
 
-setwd("~/ResearchCode/antiTrustData")
+setwd("~/ResearchCode/antiTrustDataKH")
 read.csv("ctrl.csv",sep=",") -> control
-list.files("~/ResearchCode/antiTrustData") -> allFi
+list.files("~/ResearchCode/antiTrustDataKH") -> allFi
 
 outList <- list()
 searchList <- list()
@@ -69,9 +69,7 @@ merge(control,allRuns,by="key",all.x=TRUE) -> joint
 joint[is.na(joint$ran),"ran"] <- FALSE
 
 table(joint$ran)
-joint$ran -> bool
-(1:nrow(joint))[!bool] -> missing
-missing[2:length(missing)]-missing[1:(length(missing)-1)]
+
 # now classify the runs as control runs, VPN runs, sharing runs, deletion runs
 
 control$VPN <- control$vpnTick !=-10
@@ -96,7 +94,7 @@ outDat %>% transform(googBool=(currEngine=="google")) %>% group_by(key) %>% summ
 keySmry$duckCnt <- keySmry$searchCnt-keySmry$googCnt
 
 # now cut down control to only have the relevant information
-controlMerge <- control[,c("key","seed1","seed2","runType")]
+controlMerge <- control[,c("key","seed1","seed2","runType","privacyVal")]
 
 finDat <- merge(controlMerge,keySmry,by="key")
 finDat$googPct <- finDat$googCnt/finDat$searchCnt
@@ -105,8 +103,81 @@ vpnDat <- finDat[finDat$runType==1,]
 delDat <- finDat[finDat$runType==2,]
 shareDat <- finDat[finDat$runType==4,]
 
+vpnBaseDat  <- finDat[finDat$runType==0 | finDat$runType==1 ,]
+delBaseDat  <- finDat[finDat$runType==0 | finDat$runType==2 ,]
+shareBaseDat  <- finDat[finDat$runType==0 | finDat$runType==4 ,]
 
+ggplot() + geom_point(aes(x=baseDat$privacyVal,y=baseDat$googPct))
+ggplot() + geom_point(aes(x=vpnBaseDat$privacyVal,y=vpnBaseDat$googPct,color=as.factor(vpnBaseDat$runType)))
+ggplot() + geom_point(aes(x=delBaseDat$privacyVal,y=delBaseDat$googPct,color=as.factor(delBaseDat$runType)))
+ggplot() + geom_point(aes(x=shareBaseDat$privacyVal,y=shareBaseDat$googPct,color=as.factor(shareBaseDat$runType)))
 
+# now, examine wealth transfers
+baseDat[,c("seed1","seed2","googPct","privacyVal")] -> baseDat
+names(baseDat)[[3]] <- "googPctBase"
+vpnDat[,c("seed1","seed2","googPct")] -> vpnDat
+names(vpnDat)[[3]] <- "googPctVpn"
+delDat[,c("seed1","seed2","googPct")] -> delDat
+names(delDat)[[3]] <- "googPctDel"
+shareDat[,c("seed1","seed2","googPct")] -> shareDat
+names(shareDat)[[3]] <- "googPctShar"
+merge(baseDat,vpnDat,by=c("seed1","seed2")) -> vpnSideDat
+merge(baseDat,delDat,by=c("seed1","seed2")) -> delSideDat
+merge(baseDat,shareDat,by=c("seed1","seed2")) -> sharSideDat
+vpnSideDat$delta <- vpnSideDat$googPctVpn-vpnSideDat$googPctBase
+delSideDat$delta <- delSideDat$googPctDel-delSideDat$googPctBase
+sharSideDat$delta <- sharSideDat$googPctShar-sharSideDat$googPctBase
+
+#vpnTrue <- "#4285f4"
+#vpnFalse <- "#ea4335"
+
+# 
+vpnSideDat$deltaSign <- as.character(vpnSideDat$delta >= 0)
+
+ggplot() + scale_color_manual(values = c("FALSE" = hiOrange, "TRUE" = googColor)) + 
+  geom_point(aes(x=(1-vpnSideDat$privacyVal),y=vpnSideDat$delta,color=vpnSideDat$deltaSign)) + xlab("Population Privacy Index") + ylab("Additional Google Usage Over Base") + ggtitle("VPN Access") + theme(
+  panel.background = element_rect(fill = bgFill),
+  plot.title = element_text(color =basePoint,hjust = 0.5),
+  plot.background = element_rect(fill = bgFill),
+  panel.grid = element_line(color = basePoint,
+  size = 0.25,
+  linetype = 2),
+  axis.text = element_text(color =basePoint),
+  axis.title = element_text(color =basePoint),
+  #legend.background = element_rect(fill = bgFill),
+  #legend.text = element_text(color =basePoint)
+  legend.position = "none")
+delSideDat$deltaSign <- as.character(delSideDat$delta >= 0)
+ggplot() + scale_color_manual(values = c("FALSE" = hiOrange, "TRUE" = googColor)) + geom_point(aes(x=(1-delSideDat$privacyVal),y=delSideDat$delta,color=delSideDat$deltaSign)) + 
+  ggtitle("Deletion Law") + xlab("Population Privacy Index") + ylab("Additional Google Usage Over Base") +theme(
+  panel.background = element_rect(fill = bgFill),
+  plot.title = element_text(color =basePoint,hjust = 0.5),
+  plot.background = element_rect(fill = bgFill),
+  panel.grid = element_line(color = basePoint,
+                            size = 0.25,
+                            linetype = 2),
+  axis.text = element_text(color =basePoint),
+  axis.title = element_text(color =basePoint),
+  #legend.background = element_rect(fill = bgFill),
+  #legend.text = element_text(color =basePoint)
+  legend.position = "none")
+
+sharSideDat$deltaSign <- as.character(sharSideDat$delta >= 0)
+ggplot() + scale_color_manual(values = c("FALSE" = hiOrange, "TRUE" = googColor)) + geom_point(aes(x=(1-sharSideDat$privacyVal),y=sharSideDat$delta,color=sharSideDat$deltaSign)) + 
+  xlab("Population Privacy Index") + ylab("Additional Google Usage Over Base") + ggtitle("Sharing Law") + theme(
+  panel.background = element_rect(fill = bgFill),
+  plot.title = element_text(color =basePoint,hjust = 0.5),
+  plot.background = element_rect(fill = bgFill),
+  panel.grid = element_line(color = basePoint,
+                            size = 0.25,
+                            linetype = 2),
+  axis.text = element_text(color =basePoint),
+  axis.title = element_text(color =basePoint),
+  #legend.background = element_rect(fill = bgFill),
+  #legend.text = element_text(color =basePoint)
+  legend.position = "none")
+
+lm(delSideDat$delta~delSideDat$privacyVal)
 
 ggplot()+ geom_histogram(aes(x=finDat$googPct,fill=as.factor(finDat$runType)),alpha=.4) + xlab("% of Searches on Google") + ylab("Count")
 cbind(c("Base","VPN","Deletion","Share"),rbind(
@@ -127,7 +198,7 @@ merge(baseDat,vpnDat,by=c("seed1","seed2")) -> vpnBase
 merge(baseDat,delDat,by=c("seed1","seed2")) -> delBase
 merge(baseDat,shareDat,by=c("seed1","seed2")) -> shareBase
 
-vpnBase$delta <- vpnBase$googPctBaseVpn-vpnBase$googPctBase
+vpnBase$delta <- vpnBase$googPctBaseVpn-vpnBase$googPctBase 
 delBase$delta <- delBase$googPctBaseDel - delBase$googPctBase
 shareBase$delta <- shareBase$googPctBaseShare - shareBase$googPctBase
 
