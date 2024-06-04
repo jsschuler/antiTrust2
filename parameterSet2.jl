@@ -7,6 +7,8 @@
 ###########################################################################################################
 
 # now select a seed 
+println("FLAG")
+println(paramVec)
 seed1=paramVec[3]
 Random.seed!(seed1)
 #strSeed=string(seed)

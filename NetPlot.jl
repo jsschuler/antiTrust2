@@ -93,20 +93,23 @@ end
 
 # now we need a function that outputs the SVG 
 
-function svgGen(tick::Int64)
-    global agtList
+#function svgGen(tick::Int64)
+#    global agtList
     #global curLayout
     #run$strSeed-$currTime
-    global key
+#    global key
     
-    loc="../antiTrustPlots/run"*key
-    if !isdir(loc)
-        run(`mkdir $loc`)
-    end
-    draw(SVG(loc*"/graph"*string(tick)*".svg", 16cm, 16cm), gplot(agtGraph,layout=spectral_layout,
-                                                   nodefillc=agentBaseColor.(agtList),
-                                                   nodestrokec=agentOutlineColor.(agtList),
-                                                   nodestrokelw=agentOutlineWidth.(agtList)))
+#    loc="../antiTrustPlots/run"*key
+#    if !isdir(loc)
+#        run(`mkdir $loc`)
+#    end
+    #draw(SVG(loc*"/graph"*string(tick)*".svg", 16cm, 16cm), gplot(agtGraph,layout=spectral_layout,
+    #                                               nodefillc=agentBaseColor.(agtList),
+    #                                               nodestrokec=agentOutlineColor.(agtList),
+    #                                               nodestrokelw=agentOutlineWidth.(agtList)))
+#end
+
+function svgGen(tick::Int64)
 end
 
 :svg

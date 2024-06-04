@@ -25,14 +25,14 @@ remainingCount=min(cores-1,size(remainingFrame)[1])
 workingFrame=remainingFrame[1:remainingCount,:]
 
 initialVec=ctrlFrame.initialized
-t=0
+t=1
 for el in initialVec
     global t
     if el==true
         t=t+1
     end
 end
-for k in (t+1):(t+1 + remainingCount)
+for k in t:(t + remainingCount -1)
     initialVec[k]=true
 end
 ctrlFrame.initialized=initialVec
@@ -47,11 +47,10 @@ counter=0
 function firstRow()
     global workingFrame
     global counter
-    if size(workingFrame)[1] <= counter 
-        counter=counter+1
-        return workingFrame[counter,:]
-    else
-        return :complete
+    println("FRAME")
+    println(workingFrame)
+    counter=counter+1
+    return workingFrame[counter,:]
 end
 
 # two things left:
@@ -74,13 +73,12 @@ end
     end
 end    
 
-# if I alter the above function to throw off a complete symbol, then I can solve the breakage problem
 
 @everywhere key=""
 # first division, either the process is done or it isn,t
 coreDict=Dict()
 resultDict=Dict()
-for j in 2:cores
+for j in 2:min(cores,remainingCount+1)
     coreDict[j]=nothing
     resultDict[j]=nothing
 end
@@ -109,7 +107,7 @@ while true
         return false
     end
 
-    for c in 2:cores
+    for c in keys(coreDict)
         if isnothing(coreDict[c])
             # if the core dictionary is nothing, we send it the parameters
             #println("Sending Parameters")
