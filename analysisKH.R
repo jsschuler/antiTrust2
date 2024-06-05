@@ -206,6 +206,84 @@ ggplot() + geom_histogram(aes(x=vpnBase$delta)) + ggtitle("VPN") + xlab("VPN - B
 ggplot() + geom_histogram(aes(x=delBase$delta)) + ggtitle("Deletion") + xlab("Deletion - Base")
 ggplot() + geom_histogram(aes(x=shareBase$delta)) + ggtitle("Sharing") + xlab("Sharing - Base")
 
-# follow up
-# study these gaps as a function of privacy parameter of the population. This will require additonal model runs. 
+### Rule Order ###
 
+setwd("~/ResearchCode/antiTrustDataOrder")
+read.csv("ctrl.csv",sep=",") -> control
+list.files("~/ResearchCode/antiTrustDataOrder") -> allFi
+
+outList <- list()
+searchList <- list()
+beforeList <- list()
+afterList <- list()
+agentList <- list()
+for (fi in allFi){
+  if (grepl("output",fi)){read.csv(fi,header = FALSE)-> outList[[length(outList)+1]]  }
+  if (grepl("before",fi)){read.csv(fi,header = FALSE)-> beforeList[[length(beforeList)+1]]  }
+  if (grepl("search",fi)){read.csv(fi,header = FALSE)-> searchList[[length(searchList)+1]]  }
+  if (grepl("after",fi)){read.csv(fi,header = FALSE)-> afterList[[length(afterList)+1]]  }
+  if (grepl("agent",fi)){read.csv(fi,header = FALSE)-> agentList[[length(agentList)+1]]  }
+}
+list.rbind(outList) -> outDat
+names(outDat) <- c("key","tick","agent","currEngine","duckTick","vpnTick","delTick","shareTick","optOut")
+
+list.rbind(beforeList) -> beforeDat
+names(beforeDat) <- c("key","tick","agent","act","engine")
+
+list.rbind(searchList) -> searchDat
+names(searchDat) <- c("key","tick","agent","searchEngine","optOut","waitTime","utility")
+
+list.rbind(afterList) -> afterDat
+names(afterDat) <- c("key","tick","agent","act","engine","result")
+
+list.rbind(agentList) -> agentDat
+names(agentDat) <- c("key","agent","blissPoint","selfExp","unifExp")
+
+read.csv("ctrl.csv") -> control
+
+control$runType <- (control$deletionTick < control$sharingTick) + 2*(control$deletionTick==control$sharingTick) + 4*(control$deletionTick > control$sharingTick)
+
+outDat <- outDat[outDat$tick >= 150,]
+
+outDat %>% transform(googBool=(currEngine=="google")) %>% group_by(key) %>% 
+  summarize(searchCnt=n(),googCnt=sum(googBool)) %>% transform(googPct=googCnt/searchCnt)-> keySmry
+ctrl <- control[,c("key","seed1","seed2","privacyVal","runType")]
+merge(keySmry,ctrl,by="key") -> orderSmry
+
+
+
+orderSmry %>% group_by(runType,privacyVal) %>% summarise(googMn=mean(googPct),goog75=quantile(googPct,c(.75))) -> privSmry
+
+ggplot() + geom_point(aes(x=orderSmry$privacyVal,y=orderSmry$googPct,color=as.factor(orderSmry$runType)),alpha=.2) +
+  geom_line(aes(x=privSmry$privacyVal,y=privSmry$googMn,color=as.character(privSmry$runType)))
+
+ggplot() + geom_point(aes(x=orderSmry$privacyVal,y=orderSmry$googPct,color=as.factor(orderSmry$runType)),alpha=.2) +
+  geom_line(aes(x=privSmry$privacyVal,y=privSmry$goog95,color=as.character(privSmry$runType)))
+
+# now compare deletion first to sharing first
+
+orderSmyNonSimul <- orderSmry[orderSmry$runType!=2,]
+delFirst <- orderSmyNonSimul[orderSmyNonSimul$runType==1,c("key","seed1","seed2","privacyVal","googPct")]
+names(delFirst)[[5]] <- "key1"
+names(delFirst)[[5]] <- "googPctDelFirst"
+sharFirst <- orderSmyNonSimul[orderSmyNonSimul$runType==4,c("key","seed1","seed2","googPct")]
+names(sharFirst)[[1]] <- "key2"
+names(sharFirst)[[4]] <- "googPctsharFirst"
+
+merge(delFirst,sharFirst,by=c("seed1","seed2")) -> orderJoint
+orderJoint$delta <- orderJoint$googPctDelFirst-orderJoint$googPctsharFirst
+
+ggplot() + geom_point(aes(x=orderJoint$privacyVal,y=orderJoint$delta))
+
+lm(orderJoint$delta~orderJoint$privacyVal)
+table(orderJoint$delta >= 0)[["TRUE"]]/nrow(orderJoint)
+
+orderJoint %>% group_by(privacyVal) %>% summarize(cnt=n())
+
+# now, sample 100 times with replacement stratified by privacy value
+proport <- c()
+for (i in 1:100){
+  sampOrder <- c()
+  for (j in 1:15){sampOrder <- c(sampOrder,sample(1:10,replace = TRUE))}
+  c(proport,table(orderJoint[sampOrder,"delta"] >= 0)[["TRUE"]]/nrow(orderJoint)) -> proport
+}

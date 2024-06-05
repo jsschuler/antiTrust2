@@ -19,8 +19,8 @@ using Combinatorics
 
 # now Step 1: Generate the control structure
 
-sweeps=15
-reps=10
+sweeps=20
+reps=20
 
 # generate a seed 
 seed1Vec=sort(repeat(rand(DiscreteUniform(1,1000000),sweeps),reps))
@@ -41,7 +41,8 @@ agtCntVec=repeat([100],sweeps*reps)
 #poissonDist=sort(repeat(Poisson.(switchPct.*agtCnt),reps))
 # and a probability distribution for how much agents search 
 # set the Graph structure
-pctConnectedVec=sort(repeat(rand(Uniform(),sweeps),reps))
+#pctConnectedVec=sort(repeat(rand(Uniform(),sweeps),reps))
+pctConnectedVec=repeat([.25],sweeps*reps)
 expDegreeVec=floor.(Int64,pctConnectedVec.*agtCntVec)
 #βVec=sort(repeat(rand(Uniform(),sweeps),reps))
 βVec=repeat([.5],sweeps*reps)
@@ -91,7 +92,7 @@ tickFrame=crossjoin(duckFrame,vpnFrame,delFrame,sharFrame)
 # now remove any row with more than one Tick of 50
 #tickFrame.totTick=tickFrame.deletionTick + tickFrame.sharingTick
 
-#tickFrame=tickFrame[tickFrame.totTick.==30 .|| tickFrame.totTick.==-30,:]
+tickFrame=tickFrame[tickFrame.deletionTick.==50 .&& tickFrame.sharingTick.==-50,:]
 
 #tickFrame[!,"vpnTick"].=-10
 #tickFrame[!,"deletionTick"].=-10
