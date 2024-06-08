@@ -1,9 +1,9 @@
 ################################################################################
 #             Final Analysis Code                                              #
 #             Anti-Trust Model                                                 #
-#             September 2023                                                   #
+#             June 2024 Update                                                 #
 #             John S. Schuler                                                  #
-#                                                                              #
+#             This version uses privacy index rather than bliss point          #
 ################################################################################
 
 #### BASIC RESULTS #######
@@ -143,10 +143,7 @@ ggplot() + geom_point(aes(x=agtPropUsage$privDex,y=agtPropUsage$googPct),alpha=.
   legend.background = element_rect(fill = bgFill),
   legend.text = element_text(color =basePoint)) -> plt2
 ggarrange(plt1,plt2,nrow=1,ncol=2)
-ggsave(filename = "~/ResearchCode/antiTrustImages/basic.png",width=7,height=7,bg=bgFill)
-
-# now examine the mixing speed 
-
+ggsave(filename = "~/ResearchCode/antiTrustImages/basic2.png",width=7,height=7,bg=bgFill)
 
 
 #### VPN ACCESS 
@@ -181,7 +178,7 @@ substr(agtPropUsageVPN$optOut,1,1) <- toupper(substr(agtPropUsageVPN$optOut,1,1)
 
 
 ggplot() + geom_point(aes(x=agtPropUsageVPN$privDex,y=agtPropUsageVPN$googPct,color=agtPropUsageVPN$optOut),alpha=.1)  + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$vpn),size=1) + 
-  scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse)) + xlab("Bliss Point") + ylab("Google Usage") + labs(color = "VPN") + ggtitle("Modified Logit") + theme(
+  scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse)) + xlab("Privacy Index") + ylab("Google Usage") + labs(color = "VPN") + ggtitle("Modified Logit") + theme(
   panel.background = element_rect(fill = bgFill),
   plot.title = element_text(color =basePoint,hjust = 0.5),
   plot.background = element_rect(fill = bgFill),
@@ -203,8 +200,8 @@ mnVPN <- c()
 
 for (k in 1:(length(rng)-1)){
   blissX <- c(blissX,(rng[k+1]+rng[k])/2)
-  mnNoVPN <- c(mnNoVPN,mean(agtPropUsageVPN[agtPropUsageVPN$optOut=="False" & agtPropUsageVPN$blissPoint >= rng[k] & agtPropUsageVPN$blissPoint < rng[k+1] ,"googPct"]))
-  mnVPN <- c(mnVPN,mean(agtPropUsageVPN[agtPropUsageVPN$optOut=="True" & agtPropUsageVPN$blissPoint >= rng[k] & agtPropUsageVPN$blissPoint < rng[k+1],"googPct"]))
+  mnNoVPN <- c(mnNoVPN,mean(agtPropUsageVPN[agtPropUsageVPN$optOut=="False" & agtPropUsageVPN$privDex >= rng[k] & agtPropUsageVPN$privDex < rng[k+1] ,"googPct"]))
+  mnVPN <- c(mnVPN,mean(agtPropUsageVPN[agtPropUsageVPN$optOut=="True" & agtPropUsageVPN$privDex >= rng[k] & agtPropUsageVPN$privDex < rng[k+1],"googPct"]))
   
 }
 
@@ -227,7 +224,7 @@ ggplot() + geom_point(aes(x=agtPropUsageVPN$privDex,y=agtPropUsageVPN$googPct,co
     legend.title = element_text(color =basePoint)) -> plt2
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom") 
 
-ggsave(filename = "~/ResearchCode/antiTrustImages/vpn.png",width=7,height=7,bg=bgFill)
+ggsave(filename = "~/ResearchCode/antiTrustImages/vpn2.png",width=7,height=7,bg=bgFill)
 
 
 # NOW STUDY AGENT'S TENDENCY TO USE VPNS
@@ -273,7 +270,7 @@ mnVPN <- c()
 for (k in 1:(length(rng)-1)){
   blissX <- c(blissX,(rng[k+1]+rng[k])/2)
   
-  mnVPN <- c(mnVPN,mean(vpnBliss[vpnBliss$blissPoint >= rng[k] & vpnBliss$blissPoint < rng[k+1],"optPct"]))
+  mnVPN <- c(mnVPN,mean(vpnBliss[vpnBliss$privDex >= rng[k] & vpnBliss$privDex < rng[k+1],"optPct"]))
   
 }
 
@@ -290,7 +287,7 @@ ggplot() + geom_point(aes(x=vpnBliss$privDex,y=vpnBliss$optPct,color=100*vpnBlis
     legend.text = element_text(color =basePoint),
     legend.title = element_text(color =basePoint)) -> plt2
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom")
-ggsave(filename = "~/ResearchCode/antiTrustImages/vpnUsage.png",width=7,height=7,bg=bgFill)
+ggsave(filename = "~/ResearchCode/antiTrustImages/vpnUsage2.png",width=7,height=7,bg=bgFill)
 
 
 #### DELETION LAW #####
@@ -342,7 +339,7 @@ merge(delSmry,agentDat,by=c("key","agent")) -> agtDelSmry
 # now, prepare models and plots
 
 
-lm(mLogit(agtDelSmry$googPct)~agtDelSmry$blissPoint +  (agtDelSmry$delBool)) -> lMod
+lm(mLogit(agtDelSmry$googPct)~agtDelSmry$privDex +  (agtDelSmry$delBool)) -> lMod
 
 blissRangeFunc(agtDelSmry$privDex) -> blissRng
 cbind(rep(1,length(blissRng)),blissRng,rep(0,length(blissRng))) -> noDel
@@ -415,7 +412,7 @@ ggplot() + geom_point(aes(x=agtDelSmry$privDex,y=agtDelSmry$googPct),alpha=.1,co
     legend.title = element_text(color =basePoint)) -> plt2
 
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom")
-ggsave(filename = "~/ResearchCode/antiTrustImages/deletion.png",width=7,height=7,bg=bgFill)
+ggsave(filename = "~/ResearchCode/antiTrustImages/deletion2.png",width=7,height=7,bg=bgFill)
 ##### SHARING RULES #####
 
 setwd("~/ResearchCode/antiTrustDataShare")
@@ -533,7 +530,7 @@ ggplot() + geom_point(aes(x=agtShareSmry$privDex,y=agtShareSmry$googPct),alpha=.
     legend.title = element_text(color =basePoint)) -> plt2
 
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom")
-ggsave(filename = "~/ResearchCode/antiTrustImages/sharing.png",width=7,height=7)
+ggsave(filename = "~/ResearchCode/antiTrustImages/sharing2.png",width=7,height=7)
 
 # now test importance of deletion law vs sharing law order
 
@@ -579,6 +576,8 @@ outDat$lastTick <- max(outDat$delTick,outDat$shareTick)
 
 # now, get a variable tracking which came first 
 outDat$orderCat <- as.factor((outDat$shareTick==outDat$delTick) + 2*(outDat$shareTick>outDat$delTick)+4*(outDat$shareTick<outDat$delTick))
+
+
 
 outDat[outDat$tick >= outDat$lastTick + 25 ,] -> afterLast
 #afterShareDel1$shareAvail <- (afterShareDel1$shareTick !=-10)
@@ -641,9 +640,9 @@ deletionFirst <- c()
 for (k in 1:(length(rng)-1)){
   blissX <- c(blissX,(rng[k+1]+rng[k])/2)
   
-  simultaneous <- c(simultaneous,mean(agtShareSmry[agtShareSmry$orderCat==1 & agtShareSmry$blissPoint >= rng[k] & agtShareSmry$blissPoint < rng[k+1],"googPct"]))
-  sharingFirst <- c(sharingFirst,mean(agtShareSmry[agtShareSmry$orderCat==2 & agtShareSmry$blissPoint >= rng[k] & agtShareSmry$blissPoint < rng[k+1],"googPct"]))
-  deletionFirst <- c(deletionFirst,mean(agtShareSmry[agtShareSmry$orderCat==4 & agtShareSmry$blissPoint >= rng[k] & agtShareSmry$blissPoint < rng[k+1],"googPct"]))
+  simultaneous <- c(simultaneous,mean(agtShareSmry[agtShareSmry$orderCat==1 & agtShareSmry$privDex >= rng[k] & agtShareSmry$privDex < rng[k+1],"googPct"]))
+  sharingFirst <- c(sharingFirst,mean(agtShareSmry[agtShareSmry$orderCat==2 & agtShareSmry$privDex >= rng[k] & agtShareSmry$privDex < rng[k+1],"googPct"]))
+  deletionFirst <- c(deletionFirst,mean(agtShareSmry[agtShareSmry$orderCat==4 & agtShareSmry$privDex >= rng[k] & agtShareSmry$privDex < rng[k+1],"googPct"]))
 }
 
 data.frame(c(blissX,blissX,blissX),c(simultaneous,sharingFirst,deletionFirst),c(rep("Simultaneous",length(blissX)),rep("Deletion First",length(blissX)),rep("Sharing First",length(blissX)))) -> ggFrame2
@@ -665,7 +664,9 @@ summary(modChk1)
 
 
 ggplot() + geom_point(aes(x=agtShareSmry$privDex,y=agtShareSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$order),size=1) + 
-  scale_color_manual(values = c("Simultaneous" = vpnTrue, "Deletion First" = vpnFalse,"Sharing First"=shareColor))  + ylab("% Google Usage") + xlab("Privacy Index") + labs(color="Order") + ggtitle("Moving Average")+ theme(
+scale_color_manual(values = c("Simultaneous" = vpnTrue, "Deletion First" = vpnFalse,"Sharing First"=shareColor))  + ylab("% Google Usage") + xlab("Privacy Index") +
+  
+labs(color="Order") + ggtitle("Moving Average")+ theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
     plot.background = element_rect(fill = bgFill),
@@ -678,7 +679,7 @@ ggplot() + geom_point(aes(x=agtShareSmry$privDex,y=agtShareSmry$googPct),alpha=.
     legend.title = element_text(color =basePoint))  -> plt2
 
 ggarrange(plt1,plt2,nrow=1,ncol=2,common.legend = TRUE, legend = "bottom")
-ggsave(filename = "~/ResearchCode/antiTrustImages/sharingDeletion.png",width=7,height=7)
+ggsave(filename = "~/ResearchCode/antiTrustImages/sharingDeletion2.png",width=7,height=7)
 
 
 

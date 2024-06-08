@@ -92,7 +92,7 @@ tickFrame=crossjoin(duckFrame,vpnFrame,delFrame,sharFrame)
 # now remove any row with more than one Tick of 50
 #tickFrame.totTick=tickFrame.deletionTick + tickFrame.sharingTick
 
-tickFrame=tickFrame[tickFrame.deletionTick.==50 .&& tickFrame.sharingTick.==-50,:]
+tickFrame=tickFrame[!(tickFrame.deletionTick.==50 .&& tickFrame.sharingTick.==50),:]
 
 #tickFrame[!,"vpnTick"].=-10
 #tickFrame[!,"deletionTick"].=-10
