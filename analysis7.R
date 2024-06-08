@@ -76,6 +76,10 @@ names(afterDat) <- c("key","tick","agent","act","engine","result")
 list.rbind(agentList) -> agentDat
 names(agentDat) <- c("key","agent","blissPoint","selfExp","unifExp")
 
+# now, from the agent data, calculate their privacy index
+agentDat$privDex <- (agentDat$blissPoint/agentDat$unifExp)
+
+
 # step one, consider only cases where there is no vpn
 # and only consider data where Duck Duck Go has been available
 outDat[outDat$tick >= (outDat$duckTick+50) & outDat$vpnTick==-10 & outDat$delTick==-10 & outDat$shareTick==-10,] -> afterDuck
@@ -90,14 +94,15 @@ merge(agtUsage,agentDat,by=c("agent","key")) -> agtPropUsage
 
 
 log((agtPropUsage$googPct+.01)/(1-agtPropUsage$googPct+.01)) -> logitGoog
-lm(logitGoog~agtPropUsage$blissPoint) -> centerMod
+lm(logitGoog~agtPropUsage$privDex) -> centerMod
+summary(centerMod)
 
 # now transform y back
 
 
-xRng <- seq(min(agtPropUsage$blissPoint),max(agtPropUsage$blissPoint),by=0.05)
+xRng <- seq(min(agtPropUsage$privDex),max(agtPropUsage$privDex),by=0.05)
 data.frame(xRng) -> xDat
-names(xDat) <- c("blissPoint")
+names(xDat) <- c("Privacy Index")
 cbind(rep(1,length(xRng)),xRng) %*% matrix(centerMod$coefficients,ncol=1)-> yHat
 yHatE <- (.01+exp(yHat))/(1+exp(yHat))
 
@@ -107,7 +112,7 @@ yHatE <- (.01+exp(yHat))/(1+exp(yHat))
 
 
 
-ggplot() + geom_point(aes(x=agtPropUsage$blissPoint,y=agtPropUsage$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=xRng,y=yHatE),color=googColor,size=1) + xlab("Bliss Point") + ylab("Google Usage") + ggtitle("Modified Logit") + theme(
+ggplot() + geom_point(aes(x=agtPropUsage$privDex,y=agtPropUsage$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=xRng,y=yHatE),color=googColor,size=1) + xlab("Privacy Index") + ylab("Google Usage") + ggtitle("Modified Logit") + theme(
   panel.background = element_rect(fill = bgFill),
   plot.title = element_text(color =basePoint,hjust = 0.5),
   plot.background = element_rect(fill = bgFill),
@@ -118,17 +123,17 @@ ggplot() + geom_point(aes(x=agtPropUsage$blissPoint,y=agtPropUsage$googPct),alph
   legend.text = element_text(color =basePoint)) -> plt1
 
 
-window <- .5
-seq(min(agtPropUsage$blissPoint),max(agtPropUsage$blissPoint),by=window) -> rng
+window <- .05
+seq(min(agtPropUsage$privDex),max(agtPropUsage$privDex),by=window) -> rng
 
 blissX <- c()
 mnGoog <- c()
 for (k in 1:(length(rng)-1)){
   blissX <- c(blissX,(rng[k+1]+rng[k])/2)
-  mnGoog <- c(mnGoog,mean(agtPropUsage[agtPropUsage$blissPoint >= rng[k] & agtPropUsage$blissPoint < rng[k+1] ,"googPct"]))
+  mnGoog <- c(mnGoog,mean(agtPropUsage[agtPropUsage$privDex >= rng[k] & agtPropUsage$privDex < rng[k+1] ,"googPct"]))
 }
 
-ggplot() + geom_point(aes(x=agtPropUsage$blissPoint,y=agtPropUsage$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=blissX,y=mnGoog),color=googColor,size=1) + xlab("Bliss Point") + ylab("% Google Usage") + ggtitle("Moving Average") + theme(
+ggplot() + geom_point(aes(x=agtPropUsage$privDex,y=agtPropUsage$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=blissX,y=mnGoog),color=googColor,size=1) + xlab("Privacy Index") + ylab("% Google Usage") + ggtitle("Moving Average") + theme(
   panel.background = element_rect(fill = bgFill),
   plot.title = element_text(color =basePoint,hjust = 0.5),
   plot.background = element_rect(fill = bgFill),
@@ -155,9 +160,9 @@ afterDuckVPN %>% transform(googBool=(currEngine=="google")) %>% group_by(key,age
 merge(agtUsageVPN,agentDat,by=c("agent","key")) -> agtPropUsageVPN
 
 log((agtPropUsageVPN$googPct+.01)/(1-agtPropUsageVPN$googPct+.01)) -> logitGoogVPN
-lm(logitGoogVPN~agtPropUsageVPN$blissPoint + agtUsageVPN$optOut) -> centerModVPN
+lm(logitGoogVPN~agtPropUsageVPN$privDex + agtUsageVPN$optOut) -> centerModVPN
 
-blissRange <- seq(min(agtPropUsageVPN$blissPoint),max(agtPropUsageVPN$blissPoint),by=0.05)
+blissRange <- seq(min(agtPropUsageVPN$privDex),max(agtPropUsageVPN$privDex),by=0.05)
 noVPNFrame <- data.frame(blissRange,rep(0,length(blissRange)))
 VPNFrame <- data.frame(blissRange,rep(1,length(blissRange)))
 
@@ -175,7 +180,7 @@ names(ggFrame1) <- c("blissRng","googPct","vpn")
 substr(agtPropUsageVPN$optOut,1,1) <- toupper(substr(agtPropUsageVPN$optOut,1,1))
 
 
-ggplot() + geom_point(aes(x=agtPropUsageVPN$blissPoint,y=agtPropUsageVPN$googPct,color=agtPropUsageVPN$optOut),alpha=.1)  + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$vpn),size=1) + 
+ggplot() + geom_point(aes(x=agtPropUsageVPN$privDex,y=agtPropUsageVPN$googPct,color=agtPropUsageVPN$optOut),alpha=.1)  + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$vpn),size=1) + 
   scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse)) + xlab("Bliss Point") + ylab("Google Usage") + labs(color = "VPN") + ggtitle("Modified Logit") + theme(
   panel.background = element_rect(fill = bgFill),
   plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -189,8 +194,8 @@ ggplot() + geom_point(aes(x=agtPropUsageVPN$blissPoint,y=agtPropUsageVPN$googPct
   legend.title = element_text(color =basePoint)) -> plt1
 
 
-window <- .5
-seq(min(agtPropUsageVPN$blissPoint),max(agtPropUsageVPN$blissPoint),by=window) -> rng
+window <- .05
+seq(0,1,by=window) -> rng
 
 blissX <- c()
 mnNoVPN <- c()
@@ -207,9 +212,9 @@ data.frame(c(blissX,blissX),c(mnNoVPN,mnVPN),c(rep("False",length(blissX)),rep("
 names(ggFrame2) <- c("blissRng","googPct","vpn")
 #ggFrame2$vpn <- as.factor(ggFrame2$vpn)
 
-ggplot() + geom_point(aes(x=agtPropUsageVPN$blissPoint,y=agtPropUsageVPN$googPct,color=agtPropUsageVPN$optOut),alpha=.1) + 
+ggplot() + geom_point(aes(x=agtPropUsageVPN$privDex,y=agtPropUsageVPN$googPct,color=agtPropUsageVPN$optOut),alpha=.1) + 
   geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$vpn),size=1) + scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse)) + 
-  xlab("Bliss Point") + ylab("% Google Usage") + ggtitle("Moving Average") + labs(color = "VPN") + theme(
+  xlab("Privacy Index") + ylab("% Google Usage") + ggtitle("Moving Average") + labs(color = "VPN") + theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
     plot.background = element_rect(fill = bgFill),
@@ -238,15 +243,15 @@ afterVPN %>% transform(optOut=optOut=="true") %>%  group_by(key,agent) %>% summa
 merge(vpnAgent,agentDat,by=c("key","agent")) -> vpnBliss
 
 log((vpnBliss$optPct+.01)/(1-vpnBliss$optPct+.01)) -> logitVPN
-lm(logitVPN~vpnBliss$blissPoint) -> centerVPNMod
+lm(logitVPN~vpnBliss$privDex) -> centerVPNMod
 
-blissRange <- seq(min(vpnBliss$blissPoint),max(vpnBliss$blissPoint),by=0.05)
+blissRange <- seq(0,1,by=0.05)
 cbind(rep(1,length(blissRange)),blissRange) %*% matrix(centerVPNMod$coefficients,ncol=1)-> vpnY
 
 vpnYE <- (.01+exp(vpnY))/(1+exp(vpnY))
 
-ggplot() + geom_point(aes(x=vpnBliss$blissPoint,y=vpnBliss$optPct,color=100*vpnBliss$googPct),alpha=.1) + scale_color_gradient(low = hiOrange, high = googColor)  + geom_line(aes(x=blissRange,y=vpnYE),color=vpnColor,size=1) + 
-  xlab("Bliss Point") + ylab("% VPN Usage") + labs(color="Google %") + ggtitle("Modified Logit") + theme(
+ggplot() + geom_point(aes(x=vpnBliss$privDex,y=vpnBliss$optPct,color=100*vpnBliss$googPct),alpha=.1) + scale_color_gradient(low = hiOrange, high = googColor)  + geom_line(aes(x=blissRange,y=vpnYE),color=vpnColor,size=1) + 
+  xlab("Privacy Index") + ylab("% VPN Usage") + labs(color="Google %") + ggtitle("Modified Logit") + theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
     plot.background = element_rect(fill = bgFill),
@@ -258,8 +263,8 @@ ggplot() + geom_point(aes(x=vpnBliss$blissPoint,y=vpnBliss$optPct,color=100*vpnB
     legend.text = element_text(color =basePoint),
     legend.title = element_text(color =basePoint)) -> plt1
 
-window <- .5
-seq(min(vpnBliss$blissPoint),max(vpnBliss$blissPoint),by=window) -> rng
+window <- .05
+seq(0,1,by=window) -> rng
 
 blissX <- c()
 mnNoVPN <- c()
@@ -272,8 +277,8 @@ for (k in 1:(length(rng)-1)){
   
 }
 
-ggplot() + geom_point(aes(x=vpnBliss$blissPoint,y=vpnBliss$optPct,color=100*vpnBliss$googPct),alpha=.1) + scale_color_gradient(low = hiOrange, high = googColor) + geom_line(aes(x=blissX,y=mnVPN),color=vpnColor,size=1) + 
-  xlab("Bliss Point") + ylab("% VPN Usage") + ggtitle("Moving Average") + labs(color = "Google %") + theme(
+ggplot() + geom_point(aes(x=vpnBliss$privDex,y=vpnBliss$optPct,color=100*vpnBliss$googPct),alpha=.1) + scale_color_gradient(low = hiOrange, high = googColor) + geom_line(aes(x=blissX,y=mnVPN),color=vpnColor,size=1) + 
+  xlab("Privacy Index") + ylab("% VPN Usage") + ggtitle("Moving Average") + labs(color = "Google %") + theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
     plot.background = element_rect(fill = bgFill),
@@ -322,6 +327,8 @@ names(afterDat) <- c("key","tick","agent","act","engine","result")
 
 list.rbind(agentList) -> agentDat
 names(agentDat) <- c("key","agent","blissPoint","selfExp","unifExp")
+# now, from the agent data, calculate their privacy index
+agentDat$privDex <- (agentDat$blissPoint/agentDat$unifExp)
 # step 1, let's consider in general how the deletion rule affects Google 
 
 outDat[outDat$tick > (outDat$delTick + 25),] -> delDat
@@ -337,7 +344,7 @@ merge(delSmry,agentDat,by=c("key","agent")) -> agtDelSmry
 
 lm(mLogit(agtDelSmry$googPct)~agtDelSmry$blissPoint +  (agtDelSmry$delBool)) -> lMod
 
-blissRangeFunc(agtDelSmry$blissPoint) -> blissRng
+blissRangeFunc(agtDelSmry$privDex) -> blissRng
 cbind(rep(1,length(blissRng)),blissRng,rep(0,length(blissRng))) -> noDel
 cbind(rep(1,length(blissRng)),blissRng,rep(1,length(blissRng))) -> yesDel
 
@@ -357,8 +364,8 @@ ggFrame1$deletion <- as.factor(ggFrame1$deletion)
 
 
 
-ggplot() + geom_point(aes(x=agtDelSmry$blissPoint,y=agtDelSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$deletion),size=1) + 
-  scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Deletion Law") + ggtitle("Modified Logit") + theme(
+ggplot() + geom_point(aes(x=agtDelSmry$privDex,y=agtDelSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$deletion),size=1) + 
+  scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse))  + ylab("% Google Usage") + xlab("Privacy Index") + labs(color="Deletion Law") + ggtitle("Modified Logit") + theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
     plot.background = element_rect(fill = bgFill),
@@ -372,8 +379,8 @@ ggplot() + geom_point(aes(x=agtDelSmry$blissPoint,y=agtDelSmry$googPct),alpha=.1
 
 # now get the smoothing
 
-window <- .5
-seq(min(agtDelSmry$blissPoint),max(agtDelSmry$blissPoint),by=window) -> rng
+window <- .05
+seq(0,1,by=window) -> rng
 
 blissX <- c()
 noDelSeries <- c()
@@ -382,8 +389,8 @@ delSeries <- c()
 
 for (k in 1:(length(rng)-1)){
   blissX <- c(blissX,(rng[k+1]+rng[k])/2)
-  noDelSeries <- c(noDelSeries,mean(agtDelSmry[!agtDelSmry$delBool & agtDelSmry$blissPoint >= rng[k] & agtDelSmry$blissPoint < rng[k+1],"googPct"]))
-  delSeries <- c(delSeries,mean(agtDelSmry[agtDelSmry$delBool & agtDelSmry$blissPoint >= rng[k] & agtDelSmry$blissPoint < rng[k+1],"googPct"]))
+  noDelSeries <- c(noDelSeries,mean(agtDelSmry[!agtDelSmry$delBool & agtDelSmry$privDex >= rng[k] & agtDelSmry$privDex < rng[k+1],"googPct"]))
+  delSeries <- c(delSeries,mean(agtDelSmry[agtDelSmry$delBool & agtDelSmry$privDex >= rng[k] & agtDelSmry$privDex < rng[k+1],"googPct"]))
 }
 
 data.frame(c(blissX,blissX),c(noDelSeries,delSeries),c(rep("False",length(blissX)),rep("True",length(blissX)))) -> ggFrame2
@@ -393,8 +400,8 @@ ggFrame2$deletion <- as.factor(ggFrame2$deletion)
 
 
 
-ggplot() + geom_point(aes(x=agtDelSmry$blissPoint,y=agtDelSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$deletion),size=1) + 
-  scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Deletion Law") + 
+ggplot() + geom_point(aes(x=agtDelSmry$privDex,y=agtDelSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$deletion),size=1) + 
+  scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse))  + ylab("% Google Usage") + xlab("Privacy Index") + labs(color="Deletion Law") + 
   ggtitle("Moving Average") + theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -442,7 +449,7 @@ names(afterDat) <- c("key","tick","agent","act","engine","result")
 
 list.rbind(agentList) -> agentDat
 names(agentDat) <- c("key","agent","blissPoint","selfExp","unifExp")
-
+agentDat$privDex <- (agentDat$blissPoint/agentDat$unifExp)
 # first, let's find out how a sharing rule affects Google's usage
 outDat[outDat$tick >= outDat$shareTick + 25,] -> afterShare
 afterShare$shareAvail <- (afterShare$shareTick !=-10)
@@ -454,9 +461,9 @@ merge(shareSmry,agentDat,by=c("key","agent")) -> agtShareSmry
 
 
 unique(agtShareSmry$shareAvail)
-lm(mLogit(agtShareSmry$googPct)~agtShareSmry$blissPoint +  (agtShareSmry$shareAvail)) -> lMod
+lm(mLogit(agtShareSmry$googPct)~agtShareSmry$privDex +  (agtShareSmry$shareAvail)) -> lMod
 
-blissRangeFunc(agtShareSmry$blissPoint) -> blissRng
+blissRangeFunc(agtShareSmry$privDex) -> blissRng
 cbind(rep(1,length(blissRng)),blissRng,rep(0,length(blissRng))) -> deltaNoShare
 cbind(rep(1,length(blissRng)),blissRng,rep(1,length(blissRng))) -> deltaDeltaShare
 
@@ -475,8 +482,8 @@ ggFrame1$sharing <- as.factor(ggFrame1$sharing)
 
 
 
-ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$sharing),size=1) + 
-  scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Sharing Law") + ggtitle("Modified Logit")+ theme(
+ggplot() + geom_point(aes(x=agtShareSmry$privDex,y=agtShareSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$sharing),size=1) + 
+  scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse))  + ylab("% Google Usage") + xlab("Privacy Index") + labs(color="Sharing Law") + ggtitle("Modified Logit")+ theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
     plot.background = element_rect(fill = bgFill),
@@ -490,8 +497,8 @@ ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alph
 
 # now get the smoothing
 
-window <- .5
-seq(min(agtShareSmry$blissPoint),max(agtShareSmry$blissPoint),by=window) -> rng
+window <- .05
+seq(0,1,by=window) -> rng
 
 blissX <- c()
 noSharing <- c()
@@ -501,8 +508,8 @@ Sharing <- c()
 for (k in 1:(length(rng)-1)){
   blissX <- c(blissX,(rng[k+1]+rng[k])/2)
   
-  noSharing <- c(noSharing,mean(agtShareSmry[!agtShareSmry$shareAvail & agtShareSmry$blissPoint >= rng[k] & agtShareSmry$blissPoint < rng[k+1],"googPct"]))
-  Sharing <- c(Sharing,mean(agtShareSmry[agtShareSmry$shareAvail & agtShareSmry$blissPoint >= rng[k] & agtShareSmry$blissPoint < rng[k+1],"googPct"]))
+  noSharing <- c(noSharing,mean(agtShareSmry[!agtShareSmry$shareAvail & agtShareSmry$privDex >= rng[k] & agtShareSmry$privDex < rng[k+1],"googPct"]))
+  Sharing <- c(Sharing,mean(agtShareSmry[agtShareSmry$shareAvail & agtShareSmry$privDex >= rng[k] & agtShareSmry$privDex < rng[k+1],"googPct"]))
 }
 
 data.frame(c(blissX,blissX),c(noSharing,Sharing),c(rep("False",length(blissX)),rep("True",length(blissX)))) -> ggFrame2
@@ -512,7 +519,7 @@ ggFrame2$sharing <- as.factor(ggFrame2$sharing)
 
 
 
-ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1,color=basePoint) + xlab("Bliss Point") + ylab("Google Usage %") + labs(color="Sharing") + 
+ggplot() + geom_point(aes(x=agtShareSmry$privDex,y=agtShareSmry$googPct),alpha=.1,color=basePoint) + xlab("Privacy Index") + ylab("Google Usage %") + labs(color="Sharing") + 
   geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$sharing),size=1) + scale_color_manual(values = c("False" = vpnTrue, "True" = vpnFalse))   + ggtitle("Moving Average") + theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -564,7 +571,7 @@ names(afterDat) <- c("key","tick","agent","act","engine","result")
 
 list.rbind(agentList) -> agentDat
 names(agentDat) <- c("key","agent","blissPoint","selfExp","unifExp")
-
+agentDat$privDex <- (agentDat$blissPoint/agentDat$unifExp)
 # first, let's find out how the order of the sharing and deletion rules affects 
 # Google's share.
 # step 1: the ssame time
@@ -583,9 +590,9 @@ merge(shareSmry,agentDat,by=c("key","agent")) -> agtShareSmry
 
 
 unique(agtShareSmry$shareAvail)
-lm(mLogit(agtShareSmry$googPct)~agtShareSmry$blissPoint +  agtShareSmry$orderCat) -> lMod
+lm(mLogit(agtShareSmry$googPct)~agtShareSmry$privDex +  agtShareSmry$orderCat) -> lMod
 
-blissRangeFunc(agtShareSmry$blissPoint) -> blissRng
+blissRangeFunc(agtShareSmry$privDex) -> blissRng
 cbind(rep(1,length(blissRng)), blissRng,rep(0,length(blissRng)),rep(0,length(blissRng))) -> deltaSimulatenous
 cbind(rep(1,length(blissRng)), blissRng,rep(1,length(blissRng)),rep(0,length(blissRng))) -> deltaDelFirst
 cbind(rep(1,length(blissRng)), blissRng,rep(0,length(blissRng)),rep(1,length(blissRng))) -> deltaShareFirst
@@ -608,8 +615,8 @@ names(ggFrame1) <-  c("blissRng","googPct","order")
 
 
 
-ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$order),size=1) + 
-  scale_color_manual(values = c("Simultaneous" = vpnTrue, "Deletion First" = vpnFalse,"Sharing First"=shareColor))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Order") + ggtitle("Modified Logit")+ theme(
+ggplot() + geom_point(aes(x=agtShareSmry$privDex,y=agtShareSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame1$blissRng,y=ggFrame1$googPct,color=ggFrame1$order),size=1) + 
+  scale_color_manual(values = c("Simultaneous" = vpnTrue, "Deletion First" = vpnFalse,"Sharing First"=shareColor))  + ylab("% Google Usage") + xlab("Privacy index") + labs(color="Order") + ggtitle("Modified Logit")+ theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
     plot.background = element_rect(fill = bgFill),
@@ -623,8 +630,8 @@ ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alph
 
 # now get the smoothing
 
-window <- .5
-seq(min(agtShareSmry$blissPoint),max(agtShareSmry$blissPoint),by=window) -> rng
+window <- .05
+seq(0,1,by=window) -> rng
 
 blissX <- c()
 simultaneous <- c()
@@ -644,18 +651,21 @@ names(ggFrame2) <-  c("blissRng","googPct","order")
 
 #ggFrame2$sharing <- as.factor(ggFrame2$sharing)
 
-ctrl <- control[,c("key","deletionTick","sharingTick","privacyValue")]
+ctrl <- control[,c("key","deletionTick","sharingTick","privacyVal")]
 ctrl$shareFirst <- ctrl$deletionTick < ctrl$sharingTick
 ctrl$delFirst <- ctrl$deletionTick > ctrl$sharingTick
 
 merge(agtShareSmry,ctrl,by="key") -> modOrder
-modChk <- lm(modOrder$googPct ~ modOrder$blissPoint + modOrder$shareFirst + modOrder$delFirst )
-modChk <- lm(modOrder$googPct ~ modOrder$blissPoint + modOrder$shareFirst + modOrder$delFirst + modChk)
+modChk <- lm(modOrder$googPct ~ modOrder$privDex + modOrder$shareFirst + modOrder$delFirst )
 summary(modChk)
+modChk1 <- lm(mLogit(modOrder$googPct) ~ modOrder$privDex + modOrder$shareFirst + modOrder$delFirst )
+summary(modChk1)
 
 
-ggplot() + geom_point(aes(x=agtShareSmry$blissPoint,y=agtShareSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$order),size=1) + 
-  scale_color_manual(values = c("Simultaneous" = vpnTrue, "Deletion First" = vpnFalse,"Sharing First"=shareColor))  + ylab("% Google Usage") + xlab("Bliss Point") + labs(color="Order") + ggtitle("Moving Average")+ theme(
+
+
+ggplot() + geom_point(aes(x=agtShareSmry$privDex,y=agtShareSmry$googPct),alpha=.1,color=basePoint) + geom_line(aes(x=ggFrame2$blissRng,y=ggFrame2$googPct,color=ggFrame2$order),size=1) + 
+  scale_color_manual(values = c("Simultaneous" = vpnTrue, "Deletion First" = vpnFalse,"Sharing First"=shareColor))  + ylab("% Google Usage") + xlab("Privacy Index") + labs(color="Order") + ggtitle("Moving Average")+ theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
     plot.background = element_rect(fill = bgFill),

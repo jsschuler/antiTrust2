@@ -208,9 +208,9 @@ ggplot() + geom_histogram(aes(x=shareBase$delta)) + ggtitle("Sharing") + xlab("S
 
 ### Rule Order ###
 
-setwd("~/ResearchCode/antiTrustDataOrder")
+setwd("~/ResearchCode/antiTrustDataOrder2")
 read.csv("ctrl.csv",sep=",") -> control
-list.files("~/ResearchCode/antiTrustDataOrder") -> allFi
+list.files("~/ResearchCode/antiTrustDataOrder2") -> allFi
 
 outList <- list()
 searchList <- list()
@@ -247,12 +247,12 @@ outDat <- outDat[outDat$tick >= 150,]
 
 outDat %>% transform(googBool=(currEngine=="google")) %>% group_by(key) %>% 
   summarize(searchCnt=n(),googCnt=sum(googBool)) %>% transform(googPct=googCnt/searchCnt)-> keySmry
-ctrl <- control[,c("key","seed1","seed2","privacyVal","runType")]
+ctrl <- control[,c("key","seed1","seed2","privacyVal","runType","pctConnected")]
 merge(keySmry,ctrl,by="key") -> orderSmry
 
 
 
-orderSmry %>% group_by(runType,privacyVal) %>% summarise(googMn=mean(googPct),goog75=quantile(googPct,c(.75))) -> privSmry
+orderSmry %>% group_by(runType,privacyVal,pctConnected) %>% summarise(googMn=mean(googPct),goog75=quantile(googPct,c(.75))) -> privSmry
 
 ggplot() + geom_point(aes(x=orderSmry$privacyVal,y=orderSmry$googPct,color=as.factor(orderSmry$runType)),alpha=.2) +
   geom_line(aes(x=privSmry$privacyVal,y=privSmry$googMn,color=as.character(privSmry$runType)))
@@ -263,9 +263,9 @@ ggplot() + geom_point(aes(x=orderSmry$privacyVal,y=orderSmry$googPct,color=as.fa
 # now compare deletion first to sharing first
 
 orderSmyNonSimul <- orderSmry[orderSmry$runType!=2,]
-delFirst <- orderSmyNonSimul[orderSmyNonSimul$runType==1,c("key","seed1","seed2","privacyVal","googPct")]
-names(delFirst)[[5]] <- "key1"
-names(delFirst)[[5]] <- "googPctDelFirst"
+delFirst <- orderSmyNonSimul[orderSmyNonSimul$runType==1,c("key","seed1","seed2","privacyVal","pctConnected","googPct")]
+names(delFirst)[[1]] <- "key1"
+names(delFirst)[[6]] <- "googPctDelFirst"
 sharFirst <- orderSmyNonSimul[orderSmyNonSimul$runType==4,c("key","seed1","seed2","googPct")]
 names(sharFirst)[[1]] <- "key2"
 names(sharFirst)[[4]] <- "googPctsharFirst"
@@ -275,7 +275,10 @@ orderJoint$delta <- orderJoint$googPctDelFirst-orderJoint$googPctsharFirst
 
 ggplot() + geom_point(aes(x=orderJoint$privacyVal,y=orderJoint$delta))
 
-lm(orderJoint$delta~orderJoint$privacyVal)
+ggplot() + geom_point(aes(x=orderJoint$pctConnected,y=orderJoint$delta))
+
+lm(orderJoint$delta~orderJoint$privacyVal + orderJoint$pctConnected) -> mod1
+lm(orderJoint$delta~orderJoint$pctConnected) -> mod2
 table(orderJoint$delta >= 0)[["TRUE"]]/nrow(orderJoint)
 
 orderJoint %>% group_by(privacyVal) %>% summarize(cnt=n())
@@ -286,4 +289,11 @@ for (i in 1:100){
   sampOrder <- c()
   for (j in 1:15){sampOrder <- c(sampOrder,sample(1:10,replace = TRUE))}
   c(proport,table(orderJoint[sampOrder,"delta"] >= 0)[["TRUE"]]/nrow(orderJoint)) -> proport
+}
+
+# boostrap without stratification
+proport2 <- c()
+for (i in 1:100){
+  c(proport2,table(orderJoint[sample(1:nrow(orderJoint),replace=TRUE),"delta"] >= 0)[["TRUE"]]/nrow(orderJoint)) -> proport2
+  
 }
