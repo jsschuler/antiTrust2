@@ -111,66 +111,81 @@ shareBaseDat  <- finDat[finDat$runType==0 | finDat$runType==4 ,]
 boolForm <- function(val){if (val){return("True")} else {return("False")}}
 BoolForm <- Vectorize(boolForm,"val")
 
-ggplot() + geom_point(aes(x=baseDat$privacyPop,y=baseDat$googPct)) + xlab("Population Privacy Index") + 
+ggplot() + geom_point(aes(x=100*baseDat$privacyPop,y=100*baseDat$googPct)) + xlab("Population Privacy Index") + 
   ylab("Aggregate % Google Usage") + ggtitle("Aggregate Google Usage") +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
     plot.background = element_rect(fill = bgFill),
-    panel.grid = element_blank(),
+    panel.grid = element_line(color = basePoint,
+                              size = 0.25,
+                              linetype = 2),
     axis.text = element_text(color =basePoint),
     axis.title = element_text(color =basePoint),
     legend.background = element_rect(fill = bgFill,color=bgFill),
     legend.key = element_rect(fill = bgFill, colour = bgFill),
     legend.text = element_text(color =basePoint),
-    legend.title = element_text(color =basePoint))
+    legend.title = element_text(color =basePoint)) 
+
+ggsave(filename = "~/ResearchCode/antiTrustImages/KHoverall.png",width=7,height=7)
 
   
   
-ggplot() + geom_point(aes(x=vpnBaseDat$privacyPop,y=vpnBaseDat$googPct,color=BoolForm(vpnBaseDat$runType==1))) +
+ggplot() + geom_point(aes(x=100*vpnBaseDat$privacyPop,y=100*vpnBaseDat$googPct,color=BoolForm(vpnBaseDat$runType==1))) +
   xlab("Population Privacy Index") + ylab("Aggregate % Google Usage") + ggtitle("Aggregate VPN Effect") + labs(color="VPN Available") +
   scale_color_manual(values = c("True" = vpnTrue, "False" = vpnFalse)) +
     theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
     plot.background = element_rect(fill = bgFill),
-    panel.grid = element_blank(),
+    panel.grid = element_line(color = basePoint,
+                              size = 0.25,
+                              linetype = 2),
     axis.text = element_text(color =basePoint),
     axis.title = element_text(color =basePoint),
     legend.background = element_rect(fill = bgFill,color=bgFill),
     legend.key = element_rect(fill = bgFill, colour = bgFill),
     legend.text = element_text(color =basePoint),
-    legend.title = element_text(color =basePoint))
+    legend.title = element_text(color =basePoint))  -> khVPN1
 
 
-ggplot() + geom_point(aes(x=delBaseDat$privacyPop,y=delBaseDat$googPct,color=BoolForm(delBaseDat$runType==2))) + xlab("Population Privacy Index") + ylab("Aggregate % Google Usage") + ggtitle("Aggregate Deletion Law Effect") + labs(color="Deletion Law Available") +
+ggplot() + geom_point(aes(x=100*delBaseDat$privacyPop,y=100*delBaseDat$googPct,color=BoolForm(delBaseDat$runType==2))) + xlab("Population Privacy Index") + ylab("Aggregate % Google Usage") + ggtitle("Aggregate Deletion Law Effect") + labs(color="Deletion Law Available") +
   scale_color_manual(values = c("True" = vpnTrue, "False" = vpnFalse)) +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
     plot.background = element_rect(fill = bgFill),
-    panel.grid = element_blank(),
+    panel.grid = element_line(color = basePoint,
+                              size = 0.25,
+                              linetype = 2),
     axis.text = element_text(color =basePoint),
     axis.title = element_text(color =basePoint),
     legend.background = element_rect(fill = bgFill,color=bgFill),
     legend.key = element_rect(fill = bgFill, colour = bgFill),
     legend.text = element_text(color =basePoint),
-    legend.title = element_text(color =basePoint))
+    legend.title = element_text(color =basePoint))  -> khDel1
 
+ggsave(filename = "~/ResearchCode/antiTrustImages/KHDel.png",width=7,height=7)
 
-ggplot() + geom_point(aes(x=shareBaseDat$privacyPop,y=shareBaseDat$googPct,color=BoolForm(shareBaseDat$runType==4))) + xlab("Population Privacy Index") + ylab("Aggregate % Google Usage") + ggtitle("Aggregate Sharing Law Effect") + labs(color="Sharing Law Available") +
+ggplot() + geom_point(aes(x=100*shareBaseDat$privacyPop,y=100*shareBaseDat$googPct,color=BoolForm(shareBaseDat$runType==4))) + xlab("Population Privacy Index") + ylab("Aggregate % Google Usage") + ggtitle("Aggregate Sharing Law Effect") + labs(color="Sharing Law Available") +
   scale_color_manual(values = c("True" = vpnTrue, "False" = vpnFalse)) +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
     plot.background = element_rect(fill = bgFill),
-    panel.grid = element_blank(),
+    panel.grid = element_line(color = basePoint,
+                              size = 0.25,
+                              linetype = 2),
     axis.text = element_text(color =basePoint),
     axis.title = element_text(color =basePoint),
     legend.background = element_rect(fill = bgFill,color=bgFill),
     legend.key = element_rect(fill = bgFill, colour = bgFill),
     legend.text = element_text(color =basePoint),
-    legend.title = element_text(color =basePoint))
+    legend.title = element_text(color =basePoint)) -> khShar1
+ggsave(filename = "~/ResearchCode/antiTrustImages/KHsharing.png",width=7,height=7)
+
+
+
 
 # now, examine wealth transfers
 baseDat[,c("seed1","seed2","googPct","privacyPop")] -> baseDat
@@ -191,11 +206,18 @@ sharSideDat$delta <- sharSideDat$googPctShar-sharSideDat$googPctBase
 #vpnTrue <- "#4285f4"
 #vpnFalse <- "#ea4335"
 
-# 
-vpnSideDat$deltaSign <- as.character(vpnSideDat$delta >= 0)
+# we need a function that maps true and false into favoring Google vs Duck Duck Go 
+favorFunc <- function(val){
+  if (val){return("DuckDuckGo")} else {return("Google")}
+}
 
-ggplot() + scale_color_manual(values = c("FALSE" = hiOrange, "TRUE" = googColor)) + 
-  geom_point(aes(x=(1-vpnSideDat$privacyPop),y=vpnSideDat$delta,color=vpnSideDat$deltaSign)) + xlab("Population Privacy Index") + ylab("Additional Google Usage Over Base") + ggtitle("VPN Access") + theme(
+FavorFunc <- Vectorize(favorFunc,"val")
+
+vpnSideDat$deltaSign <- as.character(vpnSideDat$delta < 0)
+
+ggplot() + scale_color_manual(values = c("DuckDuckGo" = hiOrange, "Google" = googColor)) + 
+  geom_point(aes(x=(100*vpnSideDat$privacyPop),y=100*vpnSideDat$delta,color=FavorFunc(vpnSideDat$deltaSign))) + xlab("Population Privacy Index") + 
+  ylab("Additional Google Usage Over Base") + ggtitle("VPN Access") + labs(color="Favorable To")  + theme(
   panel.background = element_rect(fill = bgFill),
   plot.title = element_text(color =basePoint,hjust = 0.5),
   plot.background = element_rect(fill = bgFill),
@@ -206,25 +228,14 @@ ggplot() + scale_color_manual(values = c("FALSE" = hiOrange, "TRUE" = googColor)
   axis.title = element_text(color =basePoint),
   #legend.background = element_rect(fill = bgFill),
   #legend.text = element_text(color =basePoint)
-  legend.position = "none")
-delSideDat$deltaSign <- as.character(delSideDat$delta >= 0)
-ggplot() + scale_color_manual(values = c("FALSE" = hiOrange, "TRUE" = googColor)) + geom_point(aes(x=(delSideDat$privacyPop),y=delSideDat$delta,color=delSideDat$deltaSign)) + 
-  ggtitle("Deletion Law") + xlab("Population Privacy Index") + ylab("Additional Google Usage Over Base") +theme(
-  panel.background = element_rect(fill = bgFill),
-  plot.title = element_text(color =basePoint,hjust = 0.5),
-  plot.background = element_rect(fill = bgFill),
-  panel.grid = element_line(color = basePoint,
-                            size = 0.25,
-                            linetype = 2),
-  axis.text = element_text(color =basePoint),
-  axis.title = element_text(color =basePoint),
-  #legend.background = element_rect(fill = bgFill),
-  #legend.text = element_text(color =basePoint)
-  legend.position = "none")
+  #legend.position = "none"
+  ) + geom_hline(yintercept = 0,color="black") -> khVPN2
 
-sharSideDat$deltaSign <- as.character(sharSideDat$delta >= 0)
-ggplot() + scale_color_manual(values = c("FALSE" = hiOrange, "TRUE" = googColor)) + geom_point(aes(x=(sharSideDat$privacyPop),y=sharSideDat$delta,color=sharSideDat$deltaSign)) + 
-  xlab("Population Privacy Index") + ylab("Additional Google Usage Over Base") + ggtitle("Sharing Law") + theme(
+
+
+delSideDat$deltaSign <- as.character(delSideDat$delta < 0)
+ggplot() + scale_color_manual(values = c("DuckDuckGo" = hiOrange, "Google" = googColor)) + geom_point(aes(x=(100*delSideDat$privacyPop),y=100*delSideDat$delta,color=FavorFunc(delSideDat$deltaSign))) + 
+  ggtitle("Deletion Law") + xlab("Population Privacy Index") + ylab("Additional Google Usage Over Base") + labs(color="Favorable To") + theme(
   panel.background = element_rect(fill = bgFill),
   plot.title = element_text(color =basePoint,hjust = 0.5),
   plot.background = element_rect(fill = bgFill),
@@ -235,7 +246,44 @@ ggplot() + scale_color_manual(values = c("FALSE" = hiOrange, "TRUE" = googColor)
   axis.title = element_text(color =basePoint),
   #legend.background = element_rect(fill = bgFill),
   #legend.text = element_text(color =basePoint)
-  legend.position = "none")
+  #legend.position = "none"
+  ) + geom_hline(yintercept = 0,color="black") -> khDel2
+
+
+
+sharSideDat$deltaSign <- as.character(sharSideDat$delta < 0)
+
+
+
+ggplot() + scale_color_manual(values = c("DuckDuckGo" = hiOrange, "Google" = googColor)) + geom_point(aes(x=(100*sharSideDat$privacyPop),y=100*sharSideDat$delta,color=FavorFunc(sharSideDat$deltaSign))) + 
+  xlab("Population Privacy Index") + ylab("Additional Google Usage Over Base") + ggtitle("Sharing Law") + labs(color="Favorable To") + theme(
+  panel.background = element_rect(fill = bgFill),
+  plot.title = element_text(color =basePoint,hjust = 0.5),
+  plot.background = element_rect(fill = bgFill),
+  panel.grid = element_line(color = basePoint,
+                            size = 0.25,
+                            linetype = 2),
+  axis.text = element_text(color =basePoint),
+  axis.title = element_text(color =basePoint),
+  #legend.background = element_rect(fill = bgFill),
+  #legend.text = element_text(color =basePoint)
+  #legend.position = "none"
+  ) + geom_hline(yintercept = 0,color="black") -> khShar2
+
+
+
+
+ggarrange(khVPN1,khVPN2,nrow=1,ncol=2,common.legend = FALSE, legend = "bottom")
+
+ggsave(filename = "~/ResearchCode/antiTrustImages/KHVPN.png",width=7,height=7)
+
+ggarrange(khDel1,khDel2,nrow=1,ncol=2,common.legend = FALSE, legend = "bottom")
+
+ggsave(filename = "~/ResearchCode/antiTrustImages/KHDel.png",width=7,height=7)
+
+ggarrange(khShar1,khShar2,nrow=1,ncol=2,common.legend = FALSE, legend = "bottom")
+
+ggsave(filename = "~/ResearchCode/antiTrustImages/KHsharing.png",width=7,height=7)
 
 lm(delSideDat$delta~delSideDat$privacyPop) -> dMod
 summary(dMod)
@@ -289,46 +337,30 @@ merge(keySmry,ctrl,by="key") -> orderSmry
 
 orderSmry %>% group_by(runType,privacyVal,pctConnected) %>% summarise(googMn=mean(googPct),goog75=quantile(googPct,c(.75))) -> privSmry
 
-ggplot() + geom_point(aes(x=orderSmry$privacyVal,y=orderSmry$googPct,color=as.factor(orderSmry$runType)),alpha=.2) +
-  geom_line(aes(x=privSmry$privacyVal,y=privSmry$googMn,color=as.character(privSmry$runType)))
-
-ggplot() + geom_point(aes(x=orderSmry$privacyVal,y=orderSmry$googPct,color=as.factor(orderSmry$runType)),alpha=.2) +
-  geom_line(aes(x=privSmry$privacyVal,y=privSmry$goog95,color=as.character(privSmry$runType)))
-
-# now compare deletion first to sharing first
-
-orderSmyNonSimul <- orderSmry[orderSmry$runType!=2,]
-delFirst <- orderSmyNonSimul[orderSmyNonSimul$runType==1,c("key","seed1","seed2","privacyVal","pctConnected","googPct")]
-names(delFirst)[[1]] <- "key1"
-names(delFirst)[[6]] <- "googPctDelFirst"
-sharFirst <- orderSmyNonSimul[orderSmyNonSimul$runType==4,c("key","seed1","seed2","googPct")]
-names(sharFirst)[[1]] <- "key2"
-names(sharFirst)[[4]] <- "googPctsharFirst"
-
-merge(delFirst,sharFirst,by=c("seed1","seed2")) -> orderJoint
-orderJoint$delta <- orderJoint$googPctDelFirst-orderJoint$googPctsharFirst
-
-ggplot() + geom_point(aes(x=orderJoint$privacyVal,y=orderJoint$delta))
-
-ggplot() + geom_point(aes(x=orderJoint$pctConnected,y=orderJoint$delta))
-
-lm(orderJoint$delta~orderJoint$privacyVal + orderJoint$pctConnected) -> mod1
-lm(orderJoint$delta~orderJoint$pctConnected) -> mod2
-table(orderJoint$delta >= 0)[["TRUE"]]/nrow(orderJoint)
-
-orderJoint %>% group_by(privacyVal) %>% summarize(cnt=n())
-
-# now, sample 100 times with replacement stratified by privacy value
-proport <- c()
-for (i in 1:100){
-  sampOrder <- c()
-  for (j in 1:15){sampOrder <- c(sampOrder,sample(1:10,replace = TRUE))}
-  c(proport,table(orderJoint[sampOrder,"delta"] >= 0)[["TRUE"]]/nrow(orderJoint)) -> proport
+runFunc <- function(val){
+  if (val==1){return("Deletion First")}
+  if (val==2){return("Simultaneous")}
+  if (val==4){return("Sharing First")}
 }
 
-# boostrap without stratification
-proport2 <- c()
-for (i in 1:100){
-  c(proport2,table(orderJoint[sample(1:nrow(orderJoint),replace=TRUE),"delta"] >= 0)[["TRUE"]]/nrow(orderJoint)) -> proport2
+RunFunc <- Vectorize(runFunc,"val")
+
+ggplot() + geom_point(aes(x=100*orderSmry$privacyVal,y=100*orderSmry$googPct,color=RunFunc(orderSmry$runType)),alpha=.2) +
+  geom_line(aes(x=100*privSmry$privacyVal,y=100*privSmry$googMn,color=RunFunc(privSmry$runType))) +
+  scale_color_manual(values = c("Simultaneous" = vpnTrue, "Deletion First" = vpnFalse,"Sharing First"=shareColor)) +
+  ylab("% Google Usage") + xlab("Population Privacy index") + labs(color="Order") + ggtitle("Order of Rule Introduction") +
+  theme(
+    panel.background = element_rect(fill = bgFill),
+    plot.title = element_text(color =basePoint,hjust = 0.5),
+    plot.background = element_rect(fill = bgFill),
+    panel.grid = element_line(color = basePoint,
+                              size = 0.25,
+                              linetype = 2),
+    axis.text = element_text(color =basePoint),
+    axis.title = element_text(color =basePoint),
+    #legend.background = element_rect(fill = bgFill,color=bgFill),
+    legend.key = element_rect(fill = bgFill, colour = bgFill),
+    #legend.text = element_text(color =basePoint),
+    legend.title = element_text(color =basePoint))
   
-}
+ggsave(filename = "~/ResearchCode/antiTrustImages/KHruleOrder.png",width=7,height=7)
