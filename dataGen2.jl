@@ -20,7 +20,7 @@ using Combinatorics
 # now Step 1: Generate the control structure
 
 sweeps=20
-reps=5
+reps=50
 
 # generate a seed 
 seed1Vec=sort(repeat(rand(DiscreteUniform(1,10000),sweeps),reps))

@@ -75,7 +75,9 @@ end
 
 function allSearches(tick)
     global agtCnt
-    searchCnt=rand(searchQty,agtCnt)
+    # have each agent search 50 times
+    #searchCnt=rand(searchQty,agtCnt)
+    searchCnt=50
     # randomize agent ordering
     searchOrder=sample(1:agtCnt,agtCnt,replace=false)
     for i in searchOrder
