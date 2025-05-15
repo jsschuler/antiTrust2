@@ -19,7 +19,7 @@ using Combinatorics
 
 # now Step 1: Generate the control structure
 
-sweeps=20
+sweeps=5
 reps=50
 
 # generate a seed 
@@ -41,7 +41,8 @@ agtCntVec=repeat([100],sweeps*reps)
 #poissonDist=sort(repeat(Poisson.(switchPct.*agtCnt),reps))
 # and a probability distribution for how much agents search 
 # set the Graph structure
-pctConnectedVec=sort(repeat(rand(Uniform(),sweeps),reps))
+#pctConnectedVec=sort(repeat(rand(Uniform(),sweeps),reps))
+pctConnectedVec=repeat([.2],sweeps*reps)
 expDegreeVec=floor.(Int64,pctConnectedVec.*agtCntVec)
 #βVec=sort(repeat(rand(Uniform(),sweeps),reps))
 βVec=repeat([.5],sweeps*reps)
@@ -73,25 +74,20 @@ ctrlFrame[!,"order"].=0
 ctrlFrame[!,"initialized"]=repeat([false],size(ctrlFrame)[1])
 # now, we want to vary the time between Google and Duck Duck Go
 
+# leave all events in to keep the data structure the same
+# but -10 tick means they never happen
 duckTick=[30]
 #vpnTick=[-10,5,50,110]
 vpnTick=[-10,50]
-deletionTick=[-10,50]
-#deletionTick=[-10,5,50,110]
-#sharingTick=[-10]
-sharingTick=[-10,50]
-
+deletionTick=[-10]
+sharingTick=[-10]
 duckFrame=DataFrame(:duckTick => duckTick)
 vpnFrame=DataFrame(:vpnTick => vpnTick)
 delFrame=DataFrame(:deletionTick => deletionTick)
 sharFrame=DataFrame(:sharingTick => sharingTick)
-#tickFrame=crossjoin(duckFrame,vpnFrame)
-#tickFrame=crossjoin(duckFrame,vpnFrame,delFrame)
+
 tickFrame=crossjoin(duckFrame,vpnFrame,delFrame,sharFrame)
 
-#tickFrame[!,"vpnTick"].=-10
-#tickFrame[!,"deletionTick"].=-10
-#tickFrame[!,"sharingTick"].=-10
 
 
 ctrlFrame=crossjoin(ctrlFrame,tickFrame)
