@@ -1,6 +1,6 @@
-#using GraphPlot
-#using Compose
-#using Colors
+using GraphPlot
+using Compose
+using Colors
 # color parameters 
 googleColorFull=RGBA(.215,.710,.395,1)
 duckColorFull=RGBA(.871,.345,.200,1)
