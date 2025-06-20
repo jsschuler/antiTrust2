@@ -10,6 +10,7 @@ using Distributed
 using Combinatorics
 @everywhere using CSV
 @everywhere using DataFrames
+using DataFramesMeta
 @everywhere using Distributions
 @everywhere using InteractiveUtils
 @everywhere using Graphs 
@@ -29,7 +30,7 @@ seed2Vec=rand(DiscreteUniform(1,10000),sweeps*reps)
 # how many agents care a lot about privacy?
 # higher value means fewer care 
 #privacyValVec=sort(repeat(rand(Uniform(.1,.1),sweeps),reps))
-privacyValVec=repeat([.1],sweeps*reps)
+privacyValVec=repeat([1.0],sweeps*reps)
 #privacyBeta=Beta.(1.0,privacyVal)
 # how close does the offered search result have to be before the agent accepts it?
 searchResolutionVec=repeat([.05],sweeps*reps)
@@ -79,8 +80,8 @@ ctrlFrame[!,"initialized"]=repeat([false],size(ctrlFrame)[1])
 duckTick=[30]
 #vpnTick=[-10,5,50,110]
 vpnTick=[-10,50]
-deletionTick=[-10]
-sharingTick=[-10]
+deletionTick=[-10,50]
+sharingTick=[-10,50]
 duckFrame=DataFrame(:duckTick => duckTick)
 vpnFrame=DataFrame(:vpnTick => vpnTick)
 delFrame=DataFrame(:deletionTick => deletionTick)
@@ -89,11 +90,22 @@ sharFrame=DataFrame(:sharingTick => sharingTick)
 tickFrame=crossjoin(duckFrame,vpnFrame,delFrame,sharFrame)
 
 
-
 ctrlFrame=crossjoin(ctrlFrame,tickFrame)
 ctrlFrame.seed2=rand(DiscreteUniform(1,10000),size(ctrlFrame)[1])
 ctrlFrame.key=ctrlFrame.key.*string.(1:size(ctrlFrame)[1])
 ctrlFrame[!,"initialized"]=repeat([false],size(ctrlFrame)[1])
+# now introduce restrictions 
+# we only want runs where only one of vpnTick, deletionTick, or sharingTick is not -10
+ctrlFrame=filter(row -> (row.duckTick != -10 && row.vpnTick == -10 && row.deletionTick == -10 && row.sharingTick == -10) ||
+                        (row.duckTick != -10 && row.vpnTick != -10 && row.deletionTick == -10 && row.sharingTick == -10) ||
+                        (row.duckTick != -10 && row.vpnTick == -10 && row.deletionTick != -10 && row.sharingTick == -10) ||
+                        (row.duckTick != -10 && row.vpnTick == -10 && row.deletionTick == -10 && row.sharingTick != -10) ||
+                        (row.duckTick == -10 && row.vpnTick != -10 && row.deletionTick != -10 && row.sharingTick == -10) ||
+                        (row.duckTick == -10 && row.vpnTick != -10 && row.deletionTick == -10 && row.sharingTick != -10) ||
+                        (row.duckTick == -10 && row.vpnTick == -10 && row.deletionTick != -10 && row.sharingTick != -10), ctrlFrame)
+# and we need to set the order
+
+println(ctrlFrame)
 CSV.write("../antiTrustData/ctrl.csv", ctrlFrame,header = true,append=true)
 # now save it as JLD2
 @save "ctrl.jld2" ctrlFrame
