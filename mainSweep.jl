@@ -18,7 +18,7 @@ using Combinatorics
 
 # load the control file 
 @load "ctrl.jld2"
-cores=6
+cores=15
 # get the number of cores / rows of data 
 remainingFrame=ctrlFrame[.!ctrlFrame.initialized,:]
 remainingCount=min(cores-1,size(remainingFrame)[1])
