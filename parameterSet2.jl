@@ -55,7 +55,7 @@ searchQty=Poisson{Float64}(paramVec[12])
 # now set ticks
 ordering=paramVec[14]
 # generate ticks at random 
-tickList=sort(rand(DiscreteUniform(1,modTime),length(ordering)))
+#tickList=sort(rand(DiscreteUniform(1,modTime),length(ordering)))
 # set these to -10 by default so they don't fire 
 
 key=paramVec[4]
