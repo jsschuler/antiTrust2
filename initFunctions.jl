@@ -138,7 +138,9 @@ function agentGen(agtNum::Int64)
     #println(typeof(key))
     global engineList
     # write out to agent file 
-    global key 
+    global key
+    println("Debug")
+    println(key)
     currCSV="../antiTrustData/agents"*key*".csv"
     vecOut=DataFrame(KeyCol=key,agtNum=agtNum,bliss=blissPoint,subjExp=selfExp,unExp=unifExp)
     CSV.write(currCSV, vecOut,header = false,append=true)   
