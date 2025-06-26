@@ -31,7 +31,7 @@ for ticker in 1:modRuns
     # Step 0: new laws or search engines are introduced.
      # first, introduce any new laws or search engines 
      if tick==duckTick
-        #println("DuckDuckGo In")
+        println("DuckDuckGo In")
         duckGen()
         @actionGen()
         # add actions to history dict 
@@ -42,11 +42,11 @@ for ticker in 1:modRuns
             end
         end
     end
-    #println("Tick")
-    #println(tick)
+    println("Tick")
+    println(tick)
     # now introduce new laws if applicable 
     if tick==vpnTick
-        #println("VPN In")
+        println("VPN In")
         vpnGen(tick)
         @actionGen()
         newActions=setdiff(Set(actionList),Set(keys(actionHistory[agtList[1]])))
@@ -59,7 +59,7 @@ for ticker in 1:modRuns
     #println("Tick")
     #println(tick)
     if tick==deletionTick
-        #println("Deletion In")
+        println("Deletion In")
         deletionGen(tick)
         @actionGen()
         newActions=setdiff(Set(actionList),Set(keys(actionHistory[agtList[1]])))
@@ -73,7 +73,7 @@ for ticker in 1:modRuns
     #println("Tick")
     #println(tick)
     if tick==sharingTick
-        #println("Sharing In")
+        println("Sharing In")
         sharingGen(tick)
         @actionGen()
         newActions=setdiff(Set(actionList),Set(keys(actionHistory[agtList[1]])))
@@ -83,8 +83,8 @@ for ticker in 1:modRuns
             end
         end
     end
-    #println("Action List")
-    #println(length(actionList))
+    println("Action List")
+    println(length(actionList))
     
     # Step 1: agents previously scheduled to act take action
     # some of these agents were chosen exogenously, 
