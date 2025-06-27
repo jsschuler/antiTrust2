@@ -49,27 +49,6 @@ blissRangeFunc <- function(blissData){
 
 setwd("~/ResearchCode/antiTrustData")
 read.csv("ctrl.csv",sep=",") -> control
-read.csv("ctrl2.csv",sep=",") -> control2
-control[c(1:2000,2002:4001),] -> control
-control$seed1 <- as.integer(control$seed1)
-control$seed2 <- as.integer(control$seed2)
-control$searchResolution <- as.integer(control$searchResolution)
-control$initialized <- control$initialized == "True"
-control$privacyVal <- as.numeric(control$privacyVal)
-control$switchPct <- as.numeric(control$switchPct)
-control$agtCnt <- as.integer(control$agtCnt)
-control$pctConnected <- as.numeric(control$pctConnected)
-control$expDegree <- as.numeric(control$expDegree)
-control$β <- as.numeric(control$β)
-control$searchQty <- as.integer(control$searchQty)
-control$modRun <- as.integer(control$modRun)
-control$order <- as.integer(control$order)
-control2$initialized <- control2$initialized == "True"
-control$duckTick <- as.integer(control$duckTick)
-control$vpnTick <- as.integer(control$vpnTick)
-control$deletionTick <- as.integer(control$deletionTick)
-control$sharingTick <- as.integer(control$sharingTick)
-bind_rows(control, control2) -> control
 list.files("~/ResearchCode/antiTrustData") -> allFi
 
 outList <- list()
