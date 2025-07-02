@@ -14,7 +14,7 @@ vpnColor <- "purple"
 
 X <- seq(0,1,.01)
 Y <- dbeta(X,5,5)
-setwd("/home/jsschuler/Documents/Research/antiTrust/antiTrust")
+setwd("~/Research/antiTrust/")
 # get quantiles
 qbeta(c(.05,.25,.5,.75,.95),5,5) -> qs
 
@@ -136,7 +136,5 @@ ggplot() + geom_line(aes(x=X,y=Y)) +  geom_segment(aes(x=0,y=0,xend=1,yend=0), l
     legend.text = element_text(color =basePoint)) 
 
 
-# now, get densities
-ggplot() +  geom_segment(aes(x=0,y=0,xend=1,yend=0), linetype = "solid", color = "black") + xlab("Support") + ylab("Density") +
-  geom_line(aes(x=X,y=dbeta(X,))) 
+ 
   

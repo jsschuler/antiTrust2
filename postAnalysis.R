@@ -222,6 +222,9 @@ agtVPN$privDex <- (agtVPN$blissPoint/agtVPN$unifExp)
 
 
 # now, get a moving average and quantiles
+
+# first pool the 
+
 window <- 50
 
 datList <- list()
@@ -242,6 +245,26 @@ for (t in (window/2):(10000-window/2)){
 }
 
 rbindlist(datList) -> smryFrame
+
+smryFrame %>% filter(category == 0) %>%
+  ggplot() + geom_line(aes(x=privDex,y=mn),size=1.2) +
+  geom_line(aes(x=privDex,y=q05),alpha=.8,linetype="dotted",size=1) +
+  geom_line(aes(x=privDex,y=q95),alpha=.8,linetype="dotted",size=1) +
+  geom_ribbon(aes(x=privDex,ymin=q25,ymax=q75),alpha=.4) +
+  geom_line(aes(x=privDex,y=q50),linetype="dotted",size=1.2) +
+  theme(
+    panel.background = element_rect(fill = bgFill),
+    plot.title = element_text(color =basePoint,hjust = 0.5),
+    plot.background = element_rect(fill = bgFill),
+    panel.grid.major = element_line(color = rgb(0, 0, 0, alpha = 0.3)),
+    panel.grid.minor = element_line(color = rgb(0, 0, 0, alpha = 0.3)),
+    axis.text = element_text(color =basePoint),
+    axis.title = element_text(color =basePoint),
+    legend.background = element_rect(fill = bgFill),
+    legend.text = element_text(color =basePoint)) +
+  labs(x="Agent Privacy Index",y="% Google Usage",title="Google Usage With Respect to Agent Privacy Preference")  + ylim(0,100)
+ggsave("../antiTrustImages/base.png",width=12,height=6,bg=bgFill)
+
 
 smryFrame %>% filter(category == 0) %>%
   ggplot() + geom_line(aes(x=privDex,y=mn),size=1.2) +
@@ -417,3 +440,6 @@ smryFrame %>% filter(category == 4) %>%
 
 plot_grid(noSharePlot, sharePlot, align = "h", axis = "lr", ncol = 2)
 ggsave("../antiTrustImages/sharingAgent.png",width=12,height=6,bg=bgFill)
+
+# now, let's actually calculate the wealth transfers
+   

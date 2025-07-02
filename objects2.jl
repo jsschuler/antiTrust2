@@ -402,8 +402,8 @@ function actQuoteFunc(law,engine,idx)
                     longHist::Int64=0
                     longAlias=aliasHistory[agt][1]
                     for ali in aliasHistory[agt]
-                        println("alias")
-                        println(ali)
+                        #println("alias")
+                        #println(ali)
                         if any(x -> x==ali,keys(agt.currEngine.aliasData))
                             for hist in agt.currEngine.aliasData[ali]
                                 if length(hist) >=longHist & ali.optOut==false
