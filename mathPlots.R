@@ -137,4 +137,6 @@ ggplot() + geom_line(aes(x=X,y=Y)) +  geom_segment(aes(x=0,y=0,xend=1,yend=0), l
 
 
  
+
   
+     

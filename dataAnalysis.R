@@ -440,6 +440,3 @@ smryFrame %>% filter(category == 4) %>%
 
 plot_grid(noSharePlot, sharePlot, align = "h", axis = "lr", ncol = 2)
 ggsave("../antiTrustImages/sharingAgent.png",width=12,height=6,bg=bgFill)
-
-# now, let's actually calculate the wealth transfers
-   
