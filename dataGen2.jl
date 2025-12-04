@@ -106,6 +106,6 @@ ctrlFrame=filter(row -> (row.duckTick != -10 && row.vpnTick == -10 && row.deleti
 # and we need to set the order
 
 println(ctrlFrame)
-CSV.write("../antiTrustData/ctrl.csv", ctrlFrame,header = true,append=true)
+CSV.write("~/ctrl.csv", ctrlFrame,header = true,append=true)
 # now save it as JLD2
-@save "ctrl.jld2" ctrlFrame
+@save "~/ctrl.jld2" ctrlFrame

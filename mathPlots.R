@@ -14,7 +14,7 @@ vpnColor <- "purple"
 
 X <- seq(0,1,.01)
 Y <- dbeta(X,5,5)
-setwd("~/Research/antiTrust/")
+setwd("~/Dropbox/Data\ Archive/antiTrustData")
 # get quantiles
 qbeta(c(.05,.25,.5,.75,.95),5,5) -> qs
 

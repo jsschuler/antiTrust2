@@ -141,7 +141,7 @@ function agentGen(agtNum::Int64)
     global key
     #println("Debug")
     #println(key)
-    currCSV="../antiTrustData/agents"*key*".csv"
+    currCSV="~/agents"*key*".csv"
     vecOut=DataFrame(KeyCol=key,agtNum=agtNum,bliss=blissPoint,subjExp=selfExp,unExp=unifExp)
     CSV.write(currCSV, vecOut,header = false,append=true)   
 

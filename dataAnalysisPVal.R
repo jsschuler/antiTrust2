@@ -406,7 +406,20 @@ plotDat %>% arrange(value) %>% transform(idx=1:nrow(plotDat)) -> plotDat
 # what percentage of the data is smaller
 pVal <- min(obsIdx/nrow(plotDat),1 - obsIdx/nrow(plotDat))
 
+# now, we need to caclculate the effect size for low privacy value
+sharingDat %>% filter(privalVal=="Low") %>% transform(category=if_else(category==0,"False","True")) %>% 
+  group_by(category) %>% summarise(mn=mean(googPct)) %>% 
+  pivot_wider(names_from = category, values_from = c(mn)) %>% transform(delta=True-False) -> xBar
 
+set.seed(1357)
+sharingDat %>% filter(privalVal=="Low") %>% transform(category=if_else(category==0,"False","True")) -> shareLong
+nullMeanList <- c()
+for (i in 1:nrow(shareLong)){
+  shareLong$permCat <- sample(shareLong$category,nrow(shareLong),replace=FALSE)
+  shareLong %>% group_by(permCat) %>% summarise(mn=mean(googPct)) %>% 
+    pivot_wider(names_from = permCat, values_from = c(mn)) %>% transform(delta=True-False) -> tmp
+  nullMeanList <- c(nullMeanList,tmp$delta)
+}
 
 x0 <- min(sharingDat$googPct)
 x1 <- max(sharingDat$googPct)
@@ -1228,6 +1241,93 @@ ggplot(data=newData) + geom_line(aes(x=tick,y=median,linetype=category)) +
 ggsave(filename = "~/ResearchCode/antiTrustImages/DeletionTime.png",width=7,height=7,bg=bgFill)
 
 
+newData %>% filter(category %in% c("Deletion","No Deletion")) %>% select(tick,category,median) %>%
+  pivot_wider(names_from = category, values_from = median) %>%
+  transform(absDiff=abs(`Deletion` - `No Deletion`)) -> diffFrame
+
+# now integrate the area under the curve
+# set a seed for montecarlo integration
+set.seed(1357926567)
+nSamps <- 10000
+# get X range
+xLo <- min(diffFrame$tick)
+xHi <- max(diffFrame$tick)
+# get Y range
+yLo <- 0
+yHi <- max(diffFrame$absDiff)
+# sample points
+runif(nSamps, xLo, xHi) -> xSamps
+runif(nSamps, yLo, yHi) -> ySamps
+# now see how many are under the curve
+sum(sapply(1:nSamps, function(i){
+  # get the curve value at this x
+  curveY <- diffFrame$absDiff[which.min(abs(diffFrame$tick -
+                                              xSamps[i]))]
+  if (ySamps[i] <= curveY){
+    return (1)
+  } else {
+    return (0)
+  }
+})) -> nUnder
+# now estimate the integral
+areaRect <- (xHi - xLo) * (yHi - yLo)
+integralEst <- areaRect * (nUnder / nSamps)
+
+# now let's write a function to bootstrap the null distribution
+delTest <- function(i){
+  modJoint %>% arrange(key,tick,category) %>% filter(currEngine=="google") %>%
+    transform(googPct=100*cnt/total) 
+  # now get the category per key
+  modJoint %>% group_by(key) %>% summarise(category=max(category)) -> allCats
+  allCats$permCat <- sample(allCats$category,nrow(allCats),replace=FALSE)
+  merge(modJoint,allCats[,c("key","permCat")],by="key") -> permMod
+  permMod %>% arrange(key,tick,permCat) %>% filter(currEngine=="google") %>%
+    transform(googPct=100*cnt/total) -> permModPct
+  permModPct %>% group_by(tick,permCat) %>% 
+    summarize(q05=quantile(googPct,.05),median=quantile(googPct,.5),q95=quantile(googPct,.95)) -> permData
+  permData %>% filter(permCat %in% c(1,0)) %>% select(tick,permCat,median) %>%
+    pivot_wider(names_from = permCat, values_from = median) %>%
+    transform(absDiff=abs(`1` - `0`)) -> permDiffFrame
+  # set a seed for montecarlo integration
+  set.seed(24680 + i)
+  nSamps <- 10000
+  # get X range
+  xLo <- min(permDiffFrame$tick)
+  xHi <- max(permDiffFrame$tick)
+  # get Y range
+  yLo <- 0
+  yHi <- max(permDiffFrame$absDiff)
+  # sample points
+  runif(nSamps, xLo, xHi) -> xSamps
+  runif(nSamps, yLo, yHi) -> ySamps
+  # now see how many are under the curve
+  sum(sapply(1:nSamps, function(i){
+    # get the curve value at this x
+    curveY <- permDiffFrame$absDiff[which.min(abs(permDiffFrame$tick -
+                                                    xSamps[i]))]
+    if (ySamps[i] <= curveY){
+      return (1)
+    } else {
+      return (0)
+      
+    }
+  })) -> nUnder
+  # now estimate the integral
+  areaRect <- (xHi - xLo) * (yHi - yLo)
+  nullInt <- areaRect * (nUnder / nSamps)
+  return(nullInt)
+}
+unlist(mclapply(1:1000,delTest,mc.cores=16)) -> nullIntList
+c(rep("permute",length(nullIntList)),"observed") -> labVec
+c(nullIntList,integralEst) -> valVec
+data.frame(label=labVec,value=valVec) -> plotDat
+plotDat %>% arrange(value) %>% transform(idx=1:nrow(plotDat)) -> plotDat
+# now calculate the p-value
+(1:nrow(plotDat))[plotDat$label=="observed"] -> obsIdx
+# what percentage of the data is smaller
+pVal <- min(obsIdx/nrow(plotDat),1 - obsIdx/nrow(plotDat))
+
+
 "~/ResearchCode/MayDataArchive/antiTrustDataShare" -> loc
 variable <- "shareTick"
 varLab <- "Sharing"
@@ -1313,6 +1413,93 @@ ggplot(data=newData) + geom_line(aes(x=tick,y=median,linetype=category)) +
   geom_text(label="Sharing",x=50,y=75,angle=90,vjust=-.2,color="black", size=4,family = "Helvetica",   
             fontface = "plain")
 ggsave(filename = "~/ResearchCode/antiTrustImages/SharingTime.png",width=7,height=7,bg=bgFill)
+
+newData %>% filter(category %in% c("Sharing","No Sharing")) %>% select(tick,category,median) %>%
+  pivot_wider(names_from = category, values_from = median) %>%
+  transform(absDiff=abs(`Sharing` - `No Sharing`)) -> diffFrame
+
+# now integrate the area under the curve
+# set a seed for montecarlo integration
+set.seed(1357567)
+nSamps <- 10000
+# get X range
+xLo <- min(diffFrame$tick)
+xHi <- max(diffFrame$tick)
+# get Y range
+yLo <- 0
+yHi <- max(diffFrame$absDiff)
+# sample points
+runif(nSamps, xLo, xHi) -> xSamps
+runif(nSamps, yLo, yHi) -> ySamps
+# now see how many are under the curve
+sum(sapply(1:nSamps, function(i){
+  # get the curve value at this x
+  curveY <- diffFrame$absDiff[which.min(abs(diffFrame$tick -
+                                              xSamps[i]))]
+  if (ySamps[i] <= curveY){
+    return (1)
+  } else {
+    return (0)
+  }
+})) -> nUnder
+# now estimate the integral
+areaRect <- (xHi - xLo) * (yHi - yLo)
+integralEst <- areaRect * (nUnder / nSamps)
+
+# now let's write a function to bootstrap the null distribution
+sharTest <- function(i){
+  modJoint %>% arrange(key,tick,category) %>% filter(currEngine=="google") %>%
+    transform(googPct=100*cnt/total) 
+  # now get the category per key
+  modJoint %>% group_by(key) %>% summarise(category=max(category)) -> allCats
+  allCats$permCat <- sample(allCats$category,nrow(allCats),replace=FALSE)
+  merge(modJoint,allCats[,c("key","permCat")],by="key") -> permMod
+  permMod %>% arrange(key,tick,permCat) %>% filter(currEngine=="google") %>%
+    transform(googPct=100*cnt/total) -> permModPct
+  permModPct %>% group_by(tick,permCat) %>% 
+    summarize(q05=quantile(googPct,.05),median=quantile(googPct,.5),q95=quantile(googPct,.95)) -> permData
+  permData %>% filter(permCat %in% c(1,0)) %>% select(tick,permCat,median) %>%
+    pivot_wider(names_from = permCat, values_from = median) %>%
+    transform(absDiff=abs(`1` - `0`)) -> permDiffFrame
+  # set a seed for montecarlo integration
+  set.seed(680 + i)
+  nSamps <- 10000
+  # get X range
+  xLo <- min(permDiffFrame$tick)
+  xHi <- max(permDiffFrame$tick)
+  # get Y range
+  yLo <- 0
+  yHi <- max(permDiffFrame$absDiff)
+  # sample points
+  runif(nSamps, xLo, xHi) -> xSamps
+  runif(nSamps, yLo, yHi) -> ySamps
+  # now see how many are under the curve
+  sum(sapply(1:nSamps, function(i){
+    # get the curve value at this x
+    curveY <- permDiffFrame$absDiff[which.min(abs(permDiffFrame$tick -
+                                                    xSamps[i]))]
+    if (ySamps[i] <= curveY){
+      return (1)
+    } else {
+      return (0)
+      
+    }
+  })) -> nUnder
+  # now estimate the integral
+  areaRect <- (xHi - xLo) * (yHi - yLo)
+  nullInt <- areaRect * (nUnder / nSamps)
+  return(nullInt)
+}
+unlist(mclapply(1:1000,sharTest,mc.cores=16)) -> nullIntList
+c(rep("permute",length(nullIntList)),"observed") -> labVec
+c(nullIntList,integralEst) -> valVec
+data.frame(label=labVec,value=valVec) -> plotDat
+plotDat %>% arrange(value) %>% transform(idx=1:nrow(plotDat)) -> plotDat
+# now calculate the p-value
+(1:nrow(plotDat))[plotDat$label=="observed"] -> obsIdx
+# what percentage of the data is smaller
+pVal <- min(obsIdx/nrow(plotDat),1 - obsIdx/nrow(plotDat))
+
 
 
 
