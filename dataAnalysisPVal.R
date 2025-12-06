@@ -82,12 +82,12 @@ list.rbind(agentList) -> agentDat
 names(agentDat) <- c("key","agent","blissPoint","selfExp","unifExp")
 
 # we need several different visualizations
-# Firstly, let's look at model level differences in Google usage with vs without each option
+# Firstly, let's look at model level differences in Hoogle usage with vs without each option
 # plotted against the model level privacy parameter 
 
 outDat %>% filter(tick >= 50) %>% group_by(key,currEngine) %>% summarise(cnt=n()) %>%
   pivot_wider(names_from = currEngine, values_from = cnt, values_fill = 0) %>%
-  transform(total=google+duckDuckGo) %>% transform(googPct=100*google/total) %>% 
+  transform(total=Google+duckDuckGo) %>% transform(googPct=100*Hoogle/total) %>% 
   select(key,googPct) -> outSmry
 control$privacyVal <- as.numeric(control$privacyVal)
 control$privalVal <- if_else(control$privacyVal == 1.0, "Low", "High")
@@ -121,7 +121,7 @@ for (i in 1:nrow(vpnLong)){
 }
 ggplot() + geom_density(aes(x=nullMeanList),fill="gray",alpha=.5) +
   geom_vline(xintercept = xBar$delta,color="red",size=1.2) +
-  labs(x="Difference in % Google Usage (VPN - No VPN)",y="Density",title="Sampling Distribution under Null (Lower Privacy Preference)") +
+  labs(x="Difference in % Hoogle Usage (VPN - No VPN)",y="Density",title="Sampling Distribution under Null (Lower Privacy Preference)") +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -161,7 +161,7 @@ for (i in 1:nrow(vpnLong)){
 }
 ggplot() + geom_density(aes(x=nullMeanList),fill="gray",alpha=.5) +
   geom_vline(xintercept = xBar$delta,color="red",size=1.2) +
-  labs(x="Difference in % Google Usage (VPN - No VPN)",y="Density",title="Sampling Distribution under Null (Lower Privacy Preference)") +
+  labs(x="Difference in % Hoogle Usage (VPN - No VPN)",y="Density",title="Sampling Distribution under Null (Lower Privacy Preference)") +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -187,7 +187,7 @@ pVal <- min(obsIdx/nrow(plotDat),1 - obsIdx/nrow(plotDat))
 
 vpnDat %>% filter(privalVal=="Low") %>% transform(category=if_else(category==0,"False","True")) %>%
   ggplot() + geom_density(aes(x=googPct, linetype=category),alpha=.2) +
-  xlim(x0,x1) + labs(x="% Google Usage",y="Density",title="Lower Privacy Preference",linetype="VPN") +
+  xlim(x0,x1) + labs(x="% Hoogle Usage",y="Density",title="Lower Privacy Preference",linetype="VPN") +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -201,7 +201,7 @@ vpnDat %>% filter(privalVal=="Low") %>% transform(category=if_else(category==0,"
 
 vpnDat%>% filter(privalVal=="High") %>% transform(category=if_else(category==0,"False","True")) %>% 
   ggplot() + geom_density(aes(x=googPct, linetype=category),alpha=.2) + 
-  xlim(x0,x1) + labs(x="% Google Usage",y="Density",title="Higher Privacy Preference",linetype="VPN") +
+  xlim(x0,x1) + labs(x="% Hoogle Usage",y="Density",title="Higher Privacy Preference",linetype="VPN") +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -231,7 +231,7 @@ for (i in 1:nrow(delLong)){
 }
 ggplot() + geom_density(aes(x=nullMeanList),fill="gray",alpha=.5) +
   geom_vline(xintercept = xBar$delta,color="red",size=1.2) +
-  labs(x="Difference in % Google Usage (Deletion - No Deletion)",y="Density",title="Sampling Distribution under Null (Lower Privacy Preference)") +
+  labs(x="Difference in % Hoogle Usage (Deletion - No Deletion)",y="Density",title="Sampling Distribution under Null (Lower Privacy Preference)") +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -268,7 +268,7 @@ for (i in 1:nrow(delLong)){
 }
 ggplot() + geom_density(aes(x=nullMeanList),fill="gray",alpha=.5) +
   geom_vline(xintercept = xBar$delta,color="red",size=1.2) +
-  labs(x="Difference in % Google Usage (Deletion - No Deletion)",y="Density",title="Sampling Distribution under Null (Higher Privacy Preference)") +
+  labs(x="Difference in % Hoogle Usage (Deletion - No Deletion)",y="Density",title="Sampling Distribution under Null (Higher Privacy Preference)") +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -298,7 +298,7 @@ x0 <- min(deletionDat$googPct)
 x1 <- max(deletionDat$googPct)
 deletionDat %>% filter(privalVal=="Low") %>% transform(category=if_else(category==0,"False","True")) %>%
   ggplot() + geom_density(aes(x=googPct, linetype=category),alpha=.2) +
-  xlim(x0,x1) + labs(x="% Google Usage",y="Density",title="Lower Privacy Preference",linetype="Deletion") +
+  xlim(x0,x1) + labs(x="% Hoogle Usage",y="Density",title="Lower Privacy Preference",linetype="Deletion") +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -312,7 +312,7 @@ deletionDat %>% filter(privalVal=="Low") %>% transform(category=if_else(category
 
 deletionDat%>% filter(privalVal=="High") %>% transform(category=if_else(category==0,"False","True")) %>% 
   ggplot() + geom_density(aes(x=googPct, linetype=category),alpha=.2) + 
-  xlim(x0,x1) + labs(x="% Google Usage",y="Density",title="Higher Privacy Preference",linetype="Deletion") +
+  xlim(x0,x1) + labs(x="% Hoogle Usage",y="Density",title="Higher Privacy Preference",linetype="Deletion") +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -350,7 +350,7 @@ for (i in 1:nrow(shareLong)){
 }
 ggplot() + geom_density(aes(x=nullMeanList),fill="gray",alpha=.5) +
   geom_vline(xintercept = xBar$delta,color="red",size=1.2) +
-  labs(x="Difference in % Google Usage (Sharing - No Sharing)",y="Density",title="Sampling Distribution under Null (Lower Privacy Preference)") +
+  labs(x="Difference in % Hoogle Usage (Sharing - No Sharing)",y="Density",title="Sampling Distribution under Null (Lower Privacy Preference)") +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -386,7 +386,7 @@ for (i in 1:nrow(shareLong)){
 }
 ggplot() + geom_density(aes(x=nullMeanList),fill="gray",alpha=.5) +
   geom_vline(xintercept = xBar$delta,color="red",size=1.2) +
-  labs(x="Difference in % Google Usage (Sharing - No Sharing)",y="Density",title="Sampling Distribution under Null (Higher Privacy Preference)") +
+  labs(x="Difference in % Hoogle Usage (Sharing - No Sharing)",y="Density",title="Sampling Distribution under Null (Higher Privacy Preference)") +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -425,7 +425,7 @@ x0 <- min(sharingDat$googPct)
 x1 <- max(sharingDat$googPct)
 sharingDat %>% filter(privalVal=="Low") %>% transform(category=if_else(category==0,"False","True")) %>%
   ggplot() + geom_density(aes(x=googPct, linetype=category),alpha=.2) +
-  xlim(x0,x1) + labs(x="% Google Usage",y="Density",title="Lower Privacy Preference",linetype="Sharing") +
+  xlim(x0,x1) + labs(x="% Hoogle Usage",y="Density",title="Lower Privacy Preference",linetype="Sharing") +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -439,7 +439,7 @@ sharingDat %>% filter(privalVal=="Low") %>% transform(category=if_else(category=
 
 sharingDat%>% filter(privalVal=="High") %>% transform(category=if_else(category==0,"False","True")) %>% 
   ggplot() + geom_density(aes(x=googPct, linetype=category),alpha=.2) + 
-  xlim(x0,x1) + labs(x="% Google Usage",y="Density",title="Higher Privacy Preference",linetype="Sharing") +
+  xlim(x0,x1) + labs(x="% Hoogle Usage",y="Density",title="Higher Privacy Preference",linetype="Sharing") +
   theme(
     panel.background = element_rect(fill = bgFill),
     plot.title = element_text(color =basePoint,hjust = 0.5),
@@ -511,7 +511,7 @@ smryFrame %>% filter(category == 0) %>%
     axis.title = element_text(color =basePoint),
     legend.background = element_rect(fill = bgFill),
     legend.text = element_text(color =basePoint)) +
-  labs(x="Agent Privacy Index",y="% Google Usage",title="Google Usage With Respect to Agent Privacy Preference")  + ylim(0,100)
+  labs(x="Agent Privacy Index",y="% Hoogle Usage",title="Hoogle Usage With Respect to Agent Privacy Preference")  + ylim(0,100)
 ggsave("../antiTrustImages/base.png",width=12,height=6,bg=bgFill)
 
 
@@ -531,7 +531,7 @@ smryFrame %>% filter(category == 0) %>%
     axis.title = element_text(color =basePoint),
     legend.background = element_rect(fill = bgFill),
     legend.text = element_text(color =basePoint)) +
-  labs(x="Agent Privacy Index",y="% Google Usage",title="Google Usage without VPN")  + ylim(0,100)-> noVpnPlot
+  labs(x="Agent Privacy Index",y="% Hoogle Usage",title="Hoogle Usage without VPN")  + ylim(0,100)-> noVpnPlot
 
 smryFrame %>% filter(category == 1) %>%
   ggplot() + geom_line(aes(x=privDex,y=mn),size=1.2) +
@@ -549,7 +549,7 @@ smryFrame %>% filter(category == 1) %>%
     axis.title = element_text(color =basePoint),
     legend.background = element_rect(fill = bgFill),
     legend.text = element_text(color =basePoint)) +
-  labs(x="Agent Privacy Index",y="% Google Usage",title="Google Usage with VPN") + ylim(0,100) -> vpnPlot
+  labs(x="Agent Privacy Index",y="% Hoogle Usage",title="Hoogle Usage with VPN") + ylim(0,100) -> vpnPlot
 
 plot_grid(noVpnPlot, vpnPlot, align = "h", axis = "lr", ncol = 2)
 ggsave("../antiTrustImages/vpnAgent.png",width=12,height=6,bg=bgFill)
@@ -656,7 +656,7 @@ plotDat %>% arrange(value) %>% transform(idx=1:nrow(plotDat)) -> plotDat
 pVal <- min(obsIdx/nrow(plotDat),1 - obsIdx/nrow(plotDat))
 
 
-#plot(diffFrame$privDex,diffFrame$absDiff,type="l",xlab="Agent Privacy Index",ylab="Absolute Difference in % Google Usage",main="Absolute Difference between VPN and No VPN")
+#plot(diffFrame$privDex,diffFrame$absDiff,type="l",xlab="Agent Privacy Index",ylab="Absolute Difference in % Hoogle Usage",main="Absolute Difference between VPN and No VPN")
 
 
 ### Deletion ###
@@ -705,7 +705,7 @@ smryFrame %>% filter(category == 0) %>%
     axis.title = element_text(color =basePoint),
     legend.background = element_rect(fill = bgFill),
     legend.text = element_text(color =basePoint)) +
-  labs(x="Agent Privacy Index",y="% Google Usage",title="Google Usage without Deletion")  + ylim(0,100)-> noDelPlot
+  labs(x="Agent Privacy Index",y="% Hoogle Usage",title="Hoogle Usage without Deletion")  + ylim(0,100)-> noDelPlot
 
 smryFrame %>% filter(category == 2) %>%
   ggplot() + geom_line(aes(x=privDex,y=mn),size=1.2) +
@@ -723,7 +723,7 @@ smryFrame %>% filter(category == 2) %>%
     axis.title = element_text(color =basePoint),
     legend.background = element_rect(fill = bgFill),
     legend.text = element_text(color =basePoint)) +
-  labs(x="Agent Privacy Index",y="% Google Usage",title="Google Usage with Deletion") + ylim(0,100) -> delPlot
+  labs(x="Agent Privacy Index",y="% Hoogle Usage",title="Hoogle Usage with Deletion") + ylim(0,100) -> delPlot
 
 plot_grid(noDelPlot, delPlot, align = "h", axis = "lr", ncol = 2)
 ggsave("../antiTrustImages/deletionAgent.png",width=12,height=6,bg=bgFill)
@@ -863,7 +863,7 @@ smryFrame %>% filter(category == 0) %>%
     axis.title = element_text(color =basePoint),
     legend.background = element_rect(fill = bgFill),
     legend.text = element_text(color =basePoint)) +
-  labs(x="Agent Privacy Index",y="% Google Usage",title="Google Usage without Sharing")  + ylim(0,100)-> noSharePlot
+  labs(x="Agent Privacy Index",y="% Hoogle Usage",title="Hoogle Usage without Sharing")  + ylim(0,100)-> noSharePlot
 
 smryFrame %>% filter(category == 4) %>%
   ggplot() + geom_line(aes(x=privDex,y=mn),size=1.2) +
@@ -881,7 +881,7 @@ smryFrame %>% filter(category == 4) %>%
     axis.title = element_text(color =basePoint),
     legend.background = element_rect(fill = bgFill),
     legend.text = element_text(color =basePoint)) +
-  labs(x="Agent Privacy Index",y="% Google Usage",title="Google Usage with Sharing") + ylim(0,100) -> sharePlot
+  labs(x="Agent Privacy Index",y="% Hoogle Usage",title="Hoogle Usage with Sharing") + ylim(0,100) -> sharePlot
 
 plot_grid(noSharePlot, sharePlot, align = "h", axis = "lr", ncol = 2)
 ggsave("../antiTrustImages/sharingAgent.png",width=12,height=6,bg=bgFill)
@@ -1025,7 +1025,7 @@ jointDat %>% group_by(tick,category) %>% summarise(total=n()) -> denom
 merge(byCat,denom,by=c("tick","category")) -> jointDenom
 jointDenom$googPCt <- jointDenom$cnt / jointDenom$total
 
-jointDenom %>% arrange(tick,category) %>% filter(currEngine=="google") -> jointDenom
+jointDenom %>% arrange(tick,category) %>% filter(currEngine=="Google") -> jointDenom
 ggplot() + geom_line(data=jointDenom, aes(x=tick,y=googPCt,color=category))
 
 # now, let's get quantiles 
@@ -1033,7 +1033,7 @@ jointDat %>% group_by(key,tick,category,currEngine) %>% summarise(cnt=n()) -> mo
 
 jointDat %>% group_by(key,tick,category) %>% summarise(total=n()) -> modDenom
 merge(modSmry,modDenom,by=c("key","tick","category")) -> modJoint
-modJoint %>% arrange(key,tick,category) %>% filter(currEngine=="google") %>%
+modJoint %>% arrange(key,tick,category) %>% filter(currEngine=="Google") %>%
   transform(googPct=100*cnt/total) %>% group_by(tick,category) %>%
   summarize(q05=quantile(googPct,.05),median=quantile(googPct,.5),q95=quantile(googPct,.95)) -> newData
 
@@ -1056,7 +1056,7 @@ ggplot(data=newData) + geom_line(aes(x=tick,y=median,color="black",linetype = ca
     axis.title = element_text(color =basePoint),
     legend.background = element_rect(fill = bgFill),
     legend.text = element_text(color =basePoint)) + 
-  labs(x="Time",y="% Google Usage",title="Google Usage Over Time (VPN Introduced)",linetype="VPN Access",fill="VPN Access") +
+  labs(x="Time",y="% Hoogle Usage",title="Hoogle Usage Over Time (VPN Introduced)",linetype="VPN Access",fill="VPN Access") +
   scale_color_manual(values = c("VPN" = vpnTrue, "No VPN" = vpnFalse)) +
   scale_fill_manual(values = c("VPN" = vpnTrue, "No VPN" = vpnFalse)) +
   scale_linetype_manual(values = c("VPN" = "solid", "No VPN" = "dotted")) +
@@ -1103,13 +1103,13 @@ integralEst <- areaRect * (nUnder / nSamps)
 
 # now let's write a function to bootstrap the null distribution
 vpnTest <- function(i){
-  modJoint %>% arrange(key,tick,category) %>% filter(currEngine=="google") %>%
+  modJoint %>% arrange(key,tick,category) %>% filter(currEngine=="Hoogle") %>%
     transform(googPct=100*cnt/total) 
   # now get the category per key
   modJoint %>% group_by(key) %>% summarise(category=max(category)) -> allCats
   allCats$permCat <- sample(allCats$category,nrow(allCats),replace=FALSE)
   merge(modJoint,allCats[,c("key","permCat")],by="key") -> permMod
-  permMod %>% arrange(key,tick,permCat) %>% filter(currEngine=="google") %>%
+  permMod %>% arrange(key,tick,permCat) %>% filter(currEngine=="Hoogle") %>%
     transform(googPct=100*cnt/total) -> permModPct
   permModPct %>% group_by(tick,permCat) %>% 
     summarize(q05=quantile(googPct,.05),median=quantile(googPct,.5),q95=quantile(googPct,.95)) -> permData
@@ -1202,7 +1202,7 @@ jointDat %>% group_by(tick,category) %>% summarise(total=n()) -> denom
 merge(byCat,denom,by=c("tick","category")) -> jointDenom
 jointDenom$googPCt <- jointDenom$cnt / jointDenom$total
 
-jointDenom %>% arrange(tick,category) %>% filter(currEngine=="google") -> jointDenom
+jointDenom %>% arrange(tick,category) %>% filter(currEngine=="Hoogle") -> jointDenom
 ggplot() + geom_line(data=jointDenom, aes(x=tick,y=googPCt,color=category))
 
 # now, let's get quantiles 
@@ -1210,7 +1210,7 @@ jointDat %>% group_by(key,tick,category,currEngine) %>% summarise(cnt=n()) -> mo
 
 jointDat %>% group_by(key,tick,category) %>% summarise(total=n()) -> modDenom
 merge(modSmry,modDenom,by=c("key","tick","category")) -> modJoint
-modJoint %>% arrange(key,tick,category) %>% filter(currEngine=="google") %>%
+modJoint %>% arrange(key,tick,category) %>% filter(currEngine=="Hoogle") %>%
   transform(googPct=100*cnt/total) %>% group_by(tick,category) %>%
   summarize(q05=quantile(googPct,.05),median=quantile(googPct,.5),q95=quantile(googPct,.95)) -> newData
 
@@ -1230,7 +1230,7 @@ ggplot(data=newData) + geom_line(aes(x=tick,y=median,linetype=category)) +
     axis.title = element_text(color =basePoint),
     legend.background = element_rect(fill = bgFill),
     legend.text = element_text(color =basePoint)) + 
-  labs(x="Time",y="% Google Usage",title="Google Usage Over Time (Deletion Introduced)",linetype="Deletion Access",fill="Deletion Access") +
+  labs(x="Time",y="% Hoogle Usage",title="Hoogle Usage Over Time (Deletion Introduced)",linetype="Deletion Access",fill="Deletion Access") +
   #scale_color_manual(values = c("Deletion" = vpnTrue, "No Deletion" = vpnFalse)) +
   #scale_fill_manual(values = c("Deletion" = vpnTrue, "No Deletion" = vpnFalse)) +
   scale_linetype_manual(values = c("Deletion" = "solid", "No Deletion" = "dotted")) +
@@ -1275,13 +1275,13 @@ integralEst <- areaRect * (nUnder / nSamps)
 
 # now let's write a function to bootstrap the null distribution
 delTest <- function(i){
-  modJoint %>% arrange(key,tick,category) %>% filter(currEngine=="google") %>%
+  modJoint %>% arrange(key,tick,category) %>% filter(currEngine=="Hoogle") %>%
     transform(googPct=100*cnt/total) 
   # now get the category per key
   modJoint %>% group_by(key) %>% summarise(category=max(category)) -> allCats
   allCats$permCat <- sample(allCats$category,nrow(allCats),replace=FALSE)
   merge(modJoint,allCats[,c("key","permCat")],by="key") -> permMod
-  permMod %>% arrange(key,tick,permCat) %>% filter(currEngine=="google") %>%
+  permMod %>% arrange(key,tick,permCat) %>% filter(currEngine=="Hoogle") %>%
     transform(googPct=100*cnt/total) -> permModPct
   permModPct %>% group_by(tick,permCat) %>% 
     summarize(q05=quantile(googPct,.05),median=quantile(googPct,.5),q95=quantile(googPct,.95)) -> permData
@@ -1376,7 +1376,7 @@ jointDat %>% group_by(tick,category) %>% summarise(total=n()) -> denom
 merge(byCat,denom,by=c("tick","category")) -> jointDenom
 jointDenom$googPCt <- jointDenom$cnt / jointDenom$total
 
-jointDenom %>% arrange(tick,category) %>% filter(currEngine=="google") -> jointDenom
+jointDenom %>% arrange(tick,category) %>% filter(currEngine=="Hoogle") -> jointDenom
 ggplot() + geom_line(data=jointDenom, aes(x=tick,y=googPCt,color=category))
 
 # now, let's get quantiles 
@@ -1384,7 +1384,7 @@ jointDat %>% group_by(key,tick,category,currEngine) %>% summarise(cnt=n()) -> mo
 
 jointDat %>% group_by(key,tick,category) %>% summarise(total=n()) -> modDenom
 merge(modSmry,modDenom,by=c("key","tick","category")) -> modJoint
-modJoint %>% arrange(key,tick,category) %>% filter(currEngine=="google") %>%
+modJoint %>% arrange(key,tick,category) %>% filter(currEngine=="Hoogle") %>%
   transform(googPct=100*cnt/total) %>% group_by(tick,category) %>%
   summarize(q05=quantile(googPct,.05),median=quantile(googPct,.5),q95=quantile(googPct,.95)) -> newData
 
@@ -1404,7 +1404,7 @@ ggplot(data=newData) + geom_line(aes(x=tick,y=median,linetype=category)) +
     axis.title = element_text(color =basePoint),
     legend.background = element_rect(fill = bgFill),
     legend.text = element_text(color =basePoint)) + 
-  labs(x="Time",y="% Google Usage",title="Google Usage Over Time (Sharing Introduced)",color="Sharing Access",fill="Sharing Access") +
+  labs(x="Time",y="% Hoogle Usage",title="Hoogle Usage Over Time (Sharing Introduced)",color="Sharing Access",fill="Sharing Access") +
   #scale_color_manual(values = c("Sharing" = vpnTrue, "No Sharing" = vpnFalse)) +
   #scale_fill_manual(values = c("Sharing" = vpnTrue, "No Sharing" = vpnFalse)) +
   scale_linetype_manual(values = c("Sharing" = "solid", "No Sharing" = "dotted")) +
@@ -1448,13 +1448,13 @@ integralEst <- areaRect * (nUnder / nSamps)
 
 # now let's write a function to bootstrap the null distribution
 sharTest <- function(i){
-  modJoint %>% arrange(key,tick,category) %>% filter(currEngine=="google") %>%
+  modJoint %>% arrange(key,tick,category) %>% filter(currEngine=="Hoogle") %>%
     transform(googPct=100*cnt/total) 
   # now get the category per key
   modJoint %>% group_by(key) %>% summarise(category=max(category)) -> allCats
   allCats$permCat <- sample(allCats$category,nrow(allCats),replace=FALSE)
   merge(modJoint,allCats[,c("key","permCat")],by="key") -> permMod
-  permMod %>% arrange(key,tick,permCat) %>% filter(currEngine=="google") %>%
+  permMod %>% arrange(key,tick,permCat) %>% filter(currEngine=="Hoogle") %>%
     transform(googPct=100*cnt/total) -> permModPct
   permModPct %>% group_by(tick,permCat) %>% 
     summarize(q05=quantile(googPct,.05),median=quantile(googPct,.5),q95=quantile(googPct,.95)) -> permData
