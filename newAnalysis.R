@@ -56,7 +56,9 @@ varLab <- "VPN"
   
   jointDat$category <- if_else(jointDat[,variable]==50,TRUE,FALSE)
   
- jointDat %>% group_by(tick,category,currEngine) %>% summarise(cnt=n()) -> byCat 
+ jointDat %>% group_by(tick,category,currEngine) %>% summarise(cnt=n(), .groups="drop") %>%
+  tidyr::complete(tidyr::nesting(tick,category), currEngine=union(currEngine,"google"),
+                  fill=list(cnt=0)) -> byCat
  
  jointDat %>% group_by(tick,category) %>% summarise(total=n()) -> denom
  
@@ -67,7 +69,10 @@ varLab <- "VPN"
 ggplot() + geom_line(data=jointDenom, aes(x=tick,y=googPCt,color=category))
   
 # now, let's get quantiles 
-jointDat %>% group_by(key,tick,category,currEngine) %>% summarise(cnt=n()) -> modSmry
+# Retain zero-Google runs for every observed run/tick/category combination.
+jointDat %>% group_by(key,tick,category,currEngine) %>% summarise(cnt=n(), .groups="drop") %>%
+  tidyr::complete(tidyr::nesting(key,tick,category), currEngine=union(currEngine,"google"),
+                  fill=list(cnt=0)) -> modSmry
 
 jointDat %>% group_by(key,tick,category) %>% summarise(total=n()) -> modDenom
 merge(modSmry,modDenom,by=c("key","tick","category")) -> modJoint
@@ -147,7 +152,9 @@ merge(control,outDat,by="key") -> jointDat
 
 jointDat$category <- if_else(jointDat[,variable]==50,TRUE,FALSE)
 
-jointDat %>% group_by(tick,category,currEngine) %>% summarise(cnt=n()) -> byCat 
+jointDat %>% group_by(tick,category,currEngine) %>% summarise(cnt=n(), .groups="drop") %>%
+  tidyr::complete(tidyr::nesting(tick,category), currEngine=union(currEngine,"google"),
+                  fill=list(cnt=0)) -> byCat
 
 jointDat %>% group_by(tick,category) %>% summarise(total=n()) -> denom
 
@@ -158,7 +165,10 @@ jointDenom %>% arrange(tick,category) %>% filter(currEngine=="google") -> jointD
 ggplot() + geom_line(data=jointDenom, aes(x=tick,y=googPCt,color=category))
 
 # now, let's get quantiles 
-jointDat %>% group_by(key,tick,category,currEngine) %>% summarise(cnt=n()) -> modSmry
+# Retain zero-Google runs for every observed run/tick/category combination.
+jointDat %>% group_by(key,tick,category,currEngine) %>% summarise(cnt=n(), .groups="drop") %>%
+  tidyr::complete(tidyr::nesting(key,tick,category), currEngine=union(currEngine,"google"),
+                  fill=list(cnt=0)) -> modSmry
 
 jointDat %>% group_by(key,tick,category) %>% summarise(total=n()) -> modDenom
 merge(modSmry,modDenom,by=c("key","tick","category")) -> modJoint
@@ -234,7 +244,9 @@ merge(control,outDat,by="key") -> jointDat
 
 jointDat$category <- if_else(jointDat[,variable]==50,TRUE,FALSE)
 
-jointDat %>% group_by(tick,category,currEngine) %>% summarise(cnt=n()) -> byCat 
+jointDat %>% group_by(tick,category,currEngine) %>% summarise(cnt=n(), .groups="drop") %>%
+  tidyr::complete(tidyr::nesting(tick,category), currEngine=union(currEngine,"google"),
+                  fill=list(cnt=0)) -> byCat
 
 jointDat %>% group_by(tick,category) %>% summarise(total=n()) -> denom
 
@@ -245,7 +257,10 @@ jointDenom %>% arrange(tick,category) %>% filter(currEngine=="google") -> jointD
 ggplot() + geom_line(data=jointDenom, aes(x=tick,y=googPCt,color=category))
 
 # now, let's get quantiles 
-jointDat %>% group_by(key,tick,category,currEngine) %>% summarise(cnt=n()) -> modSmry
+# Retain zero-Google runs for every observed run/tick/category combination.
+jointDat %>% group_by(key,tick,category,currEngine) %>% summarise(cnt=n(), .groups="drop") %>%
+  tidyr::complete(tidyr::nesting(key,tick,category), currEngine=union(currEngine,"google"),
+                  fill=list(cnt=0)) -> modSmry
 
 jointDat %>% group_by(key,tick,category) %>% summarise(total=n()) -> modDenom
 merge(modSmry,modDenom,by=c("key","tick","category")) -> modJoint

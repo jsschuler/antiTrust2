@@ -17,6 +17,8 @@ using JLD2
 using Dates
 using Plots
 using Statistics
+include(joinpath(@__DIR__, "pathConfig.jl"))
+modelPaths=prepareModelPaths(resolveModelPaths())
 # now select a seed 
 seed1=6840
 Random.seed!(seed1)

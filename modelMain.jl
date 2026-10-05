@@ -109,7 +109,7 @@ for ticker in 1:modRuns
     resetSchedule()
     # now plot data
     #svgGen(tick)
-    currCSV="~/output"*key*".csv"
+    currCSV=modelDataFile("output",key)
     for agt in agtList
         vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,agtEngine=typeof(agt.currEngine),Duck=duckTick,VPN=vpnTick,DEL=deletionTick,SHAR=sharingTick,optOut=agt.mask.optOut)
         # Create a CSV.Writer object for the file

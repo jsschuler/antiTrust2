@@ -222,7 +222,7 @@ function actQuoteFunc(law,engine,idx)
                     agt.lastAct=action
                     # now write to a CSV 
                     global key
-                    currCSV="../antiTrustData/before"*key*".csv"
+                    currCSV=modelDataFile("before",key)
                     global tick 
                     vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine))
                     CSV.write(currCSV, vecOut,header = false,append=true)
@@ -247,7 +247,7 @@ function actQuoteFunc(law,engine,idx)
                         agt.lastAct=nothing
                     end
                     global key
-                    currCSV="../antiTrustData/after"*key*".csv"
+                    currCSV=modelDataFile("after",key)
                     global tick 
                     vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine),keep=result)
                     CSV.write(currCSV, vecOut,header = false,append=true)                   
@@ -279,7 +279,7 @@ function actQuoteFunc(law,engine,idx)
                     action.engine.aliasData[agt.mask]=[]
                     agt.lastAct=action
                     global key
-                    currCSV="../antiTrustData/before"*key*".csv"
+                    currCSV=modelDataFile("before",key)
                     global tick 
                     vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine))
                     CSV.write(currCSV, vecOut,header = false,append=true)
@@ -305,7 +305,7 @@ function actQuoteFunc(law,engine,idx)
                         agt.lastAct=nothing
                     end                  
                     global key
-                    currCSV="../antiTrustData/after"*key*".csv"
+                    currCSV=modelDataFile("after",key)
                     global tick 
                     vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine),keep=result)
                     CSV.write(currCSV, vecOut,header = false,append=true) 
@@ -330,14 +330,14 @@ function actQuoteFunc(law,engine,idx)
             function beforeAct(agt::agent,action::$actNm)
                 if agt.currEngine!=action.engine
                     #println("different")
-                    # share data from the agent's current search engine to its target search engine. 
-                    action.engine.aliasData[agt.mask]=agt.currEngine.aliasData[agt.mask]
+                    # Transfer a snapshot; later updates belong to each engine separately.
+                    action.engine.aliasData[agt.mask]=copy(agt.currEngine.aliasData[agt.mask])
                     agt.prevEngine=agt.currEngine
                     agt.currEngine=action.engine
                     agt.lastAct=action
                     # now write to a CSV 
                     global key
-                    currCSV="../antiTrustData/before"*key*".csv"
+                    currCSV=modelDataFile("before",key)
                     global tick 
                     vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine))
                     CSV.write(currCSV, vecOut,header = false,append=true)
@@ -359,7 +359,7 @@ function actQuoteFunc(law,engine,idx)
                         sharingDict[agt]=true
                     end
                     global key
-                    currCSV="../antiTrustData/after"*key*".csv"
+                    currCSV=modelDataFile("after",key)
                     global tick 
                     vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine),keep=result)
                     CSV.write(currCSV, vecOut,header = false,append=true)                   
@@ -419,7 +419,7 @@ function actQuoteFunc(law,engine,idx)
                 end
                 # now write to a CSV 
                 global key
-                currCSV="../antiTrustData/before"*key*".csv"
+                currCSV=modelDataFile("before",key)
                 global tick 
                 vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine))
                 CSV.write(currCSV, vecOut,header = false,append=true)
@@ -437,7 +437,7 @@ function actQuoteFunc(law,engine,idx)
                         agt.lastAct=nothing
                     end
                     global key
-                    currCSV="../antiTrustData/after"*key*".csv"
+                    currCSV=modelDataFile("after",key)
                     global tick 
                     vecOut=DataFrame(KeyCol=key,TickCol=tick,agtCol=agt.agtNum,act=typeof(action.law),eng=typeof(action.engine),keep=result)
                     CSV.write(currCSV, vecOut,header = false,append=true)    

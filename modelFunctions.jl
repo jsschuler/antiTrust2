@@ -89,10 +89,8 @@ function allSearches(tick)
         #println(typeof(agtList[i].currEngine))
         #println(typeof(agtList[i].prevEngine))
         searchRes=search(agtList[i],searchCnt[i])
-        # now for each agent, we need to know the final target of the search result 
+        # subsearch already records each result; only aggregate waiting times here.
         for res in searchRes
-        # update search engine records for the alias with the search target
-            update(res[4],agtList[i].mask,agtList[i].currEngine)
             push!(searchWait,res[3])
         end
         # now update agent's history

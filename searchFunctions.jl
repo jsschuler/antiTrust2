@@ -40,16 +40,14 @@ function subsearch(agt::agent,engine::google,searchResolution::Float64)
     result::Float64=rand(agt.betaObj,1)[1]
     # now prepare the loop
     tick::Int64=0
-    cum::Float64=0.0
-    newRevenue::Int64=0
     finGuess::Float64=0.0
 
     maxGuess::Float64=1.0
     minGuess::Float64=0.0
+    guess::Float64=rand(bestDist,1)[1]
 
     while true
         tick=tick+1
-        guess::Float64=rand(bestDist,1)[1]
         #println("Tick")
         #println(tick)
         #println("Target")
@@ -63,21 +61,12 @@ function subsearch(agt::agent,engine::google,searchResolution::Float64)
             #println("Flag")
             break
         else
-            hiArray=Float64[1]
-            loArray=Float64[0]
+            # Retain both bounds across failures; the target remains between them.
             if guess > result
-                # if the guess is too high then we replace the upper bound with the guess 
-                #maxGuess=guess
-                push!(hiArray,guess)
+                maxGuess=guess
             else
-                # if the guess is too low, we replace the upper bound with the guess 
-                #minGuess=guess
-                push!(loArray,guess)
+                minGuess=guess
             end
-            # the max of the range should be the smallest value that was too high 
-            # parallel for min of the range
-            maxGuess=minimum(hiArray)
-            minGuess=maximum(loArray)
             # find out the quantile of the guess for the assumed distribution
             loGuess=cdf(bestDist,minGuess)
             hiGuess=cdf(bestDist,maxGuess)
@@ -114,16 +103,14 @@ function subsearch(agt::agent,engine::duckDuckGo,searchResolution::Float64)
     result::Float64=rand(agt.betaObj,1)[1]
     # now prepare the loop
     tick::Int64=0
-    cum::Float64=0.0
-    newRevenue::Int64=0
     finGuess::Float64=0.0
 
     maxGuess::Float64=1.0
     minGuess::Float64=0.0
+    guess::Float64=rand(bestDist,1)[1]
 
     while true
         tick=tick+1
-        guess::Float64=rand(bestDist,1)[1]
         #println("Tick")
         #println(tick)
         #println("Target")
@@ -137,21 +124,12 @@ function subsearch(agt::agent,engine::duckDuckGo,searchResolution::Float64)
             #println("Flag")
             break
         else
-            hiArray=Float64[1]
-            loArray=Float64[0]
+            # Retain both bounds across failures; the target remains between them.
             if guess > result
-                # if the guess is too high then we replace the upper bound with the guess 
-                #maxGuess=guess
-                push!(hiArray,guess)
+                maxGuess=guess
             else
-                # if the guess is too low, we replace the upper bound with the guess 
-                #minGuess=guess
-                push!(loArray,guess)
+                minGuess=guess
             end
-            # the max of the range should be the smallest value that was too high 
-            # parallel for min of the range
-            maxGuess=minimum(hiArray)
-            minGuess=maximum(loArray)
             # find out the quantile of the guess for the assumed distribution
             loGuess=cdf(bestDist,minGuess)
             hiGuess=cdf(bestDist,maxGuess)
@@ -166,7 +144,7 @@ function search(agt::agent,searchCnt::Int64)
     global searchResolution
     global key
     global tick
-    currCSV="../antiTrustData/search"*key*".csv"
+    currCSV=modelDataFile("search",key)
     results=[]
     for n in 1:searchCnt
         searchOut=subsearch(agt,agt.currEngine,searchResolution)

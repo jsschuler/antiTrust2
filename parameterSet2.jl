@@ -9,7 +9,7 @@
 # now select a seed 
 println("FLAG")
 println(paramVec)
-seed1=paramVec[3]
+seed1=paramVec[2]
 Random.seed!(seed1)
 #strSeed=string(seed)
 ## global parameters

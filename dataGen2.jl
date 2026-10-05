@@ -17,6 +17,9 @@ using DataFramesMeta
 @everywhere using Random
 @everywhere using JLD2
 @everywhere using Dates
+include(joinpath(@__DIR__, "pathConfig.jl"))
+include(joinpath(@__DIR__, "sweepRecovery.jl"))
+modelPaths=prepareModelPaths(resolveModelPaths())
 
 # now Step 1: Generate the control structure
 
@@ -105,7 +108,8 @@ ctrlFrame=filter(row -> (row.duckTick != -10 && row.vpnTick == -10 && row.deleti
                         (row.duckTick == -10 && row.vpnTick == -10 && row.deletionTick != -10 && row.sharingTick != -10), ctrlFrame)
 # and we need to set the order
 
+ctrlFrame[!, "complete"] = falses(size(ctrlFrame, 1))
 println(ctrlFrame)
-CSV.write("~/ctrl.csv", ctrlFrame,header = true,append=true)
+CSV.write(modelDataFile("ctrl"), ctrlFrame,header = true,append=true)
 # now save it as JLD2
-@save "~/ctrl.jld2" ctrlFrame
+saveSweepControl(ctrlFrame, modelPaths.controlFile)

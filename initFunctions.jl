@@ -37,37 +37,38 @@ function waitTime(prob::probType,agtPref::Beta{Float64})
     U::Uniform{Float64}=Uniform()
     # now prepare the loop
     tick::Int64=0
-    cum::Float64=0.0
+    minGuess::Float64=0.0
+    maxGuess::Float64=1.0
+    guess::Float64=rand(prob,1)[1]
     while true
         tick=tick+1
-        guess::Float64=rand(prob,1)[1]
         if abs(guess-result) <= searchResolution
             break
         else
             if guess > result
-                # find out the quantile of the guess for the assumed distribution
-                cum=cdf(prob,guess)
-                guess=quantile(prob,rand(U,1)[1]*(1.0-cum)+cum)
+                maxGuess=guess
             else
-                cum=cdf(prob,guess)
-                guess=quantile(prob,rand(U,1)[1]*(cum))
+                minGuess=guess
             end
+            loGuess=cdf(prob,minGuess)
+            hiGuess=cdf(prob,maxGuess)
+            guess=quantile(prob,rand(U,1)[1]*(hiGuess-loGuess)+loGuess)
         end
     end
-return tick
+    return tick
 end 
 
 function waitIter(distVec)
     agtDist::probType=distVec[1]
     searchDist::probType=distVec[2]
     result=rand(agtDist,1)[1]
-    finGuess::Float64=0.0
+    U::Uniform{Float64}=Uniform()
     maxGuess::Float64=1.0
     minGuess::Float64=0.0
     timer::Int64=0
+    guess::Float64=rand(searchDist,1)[1]
     while true
         timer=timer+1
-        guess::Float64=rand(searchDist,1)[1]
         #println("Tick")
         #println(tick)
         #println("Target")
@@ -77,7 +78,6 @@ function waitIter(distVec)
         #println("Tick\n"*string(tick)*"\nTarget\n"*string(result)*"\nGuess\n"*string(guess))
         if abs(guess-result) <= searchResolution
             # add this to the agent's history 
-            finGuess=guess
             #println("Flag")
             break
         else
@@ -93,8 +93,8 @@ function waitIter(distVec)
             hiGuess=cdf(searchDist,maxGuess)
             guess=quantile(searchDist,rand(U,1)[1]*(hiGuess-loGuess)+loGuess)
         end
-        return timer
     end
+    return timer
 end
 
 function waitTime(agtDist::probType,searchDist::probType)
@@ -141,7 +141,7 @@ function agentGen(agtNum::Int64)
     global key
     #println("Debug")
     #println(key)
-    currCSV="~/agents"*key*".csv"
+    currCSV=modelDataFile("agents",key)
     vecOut=DataFrame(KeyCol=key,agtNum=agtNum,bliss=blissPoint,subjExp=selfExp,unExp=unifExp)
     CSV.write(currCSV, vecOut,header = false,append=true)   
 
