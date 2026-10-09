@@ -8,6 +8,14 @@ From: julia:1.10
         directory, and code copy to use are all supplied at `apptainer exec`
         time (see container/run_experiment.sh), not baked into the image.
 
+%setup
+    # Cluster apptainer.conf files bind site paths such as /groups into every
+    # container, and during a build (which runs %post with --writable) the
+    # mount point must already exist in the image or the build aborts.
+    mkdir -p "${APPTAINER_ROOTFS:-$SINGULARITY_ROOTFS}"/groups \
+             "${APPTAINER_ROOTFS:-$SINGULARITY_ROOTFS}"/projects \
+             "${APPTAINER_ROOTFS:-$SINGULARITY_ROOTFS}"/scratch
+
 %post
     set -eu
     # Precompile the model's package dependencies into the image's own depot
