@@ -39,10 +39,11 @@
 ## Specify how much time your job needs. (default: see partition above)
 #SBATCH --time=05-00:00  # Total time needed for job: Days-Hours:Minutes
 
-set -euo pipefail
+## Load the relevant modules needed for the job. This runs before
+## `set -u` because module scripts often read unset variables.
+module load apptainer
 
-## Load the relevant modules needed for the job
-module load singularity
+set -euo pipefail
 
 ## --- Edit these three for your layout ---
 ## REPO_DIR must be on storage the compute node can see (e.g. /scratch, not

@@ -112,7 +112,7 @@ sbatch container/slurm/run_experiment.slurm        # all four
 sbatch --array=1 container/slurm/run_experiment.slurm   # just vpn
 ```
 
-It `module load singularity`s, then calls `run_experiment.sh` with
+It `module load apptainer`s, then calls `run_experiment.sh` with
 `ANTITRUST_SWEEP_WORKERS` set from `$SLURM_CPUS_ON_NODE - 1` (so it adapts if
 a partition's nodes aren't 64 cores) and with the data/code/image paths
 pointed at `/scratch`, not `$HOME` -- edit the three path variables near the
