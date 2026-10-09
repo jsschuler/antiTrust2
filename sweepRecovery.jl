@@ -53,7 +53,10 @@ function runSweepBatch!(ctrlFrame, paths, codeDir)
     isempty(pending) && return String[]
     workerIds = filter(!=(myid()), workers())
     isempty(workerIds) && error("Pending sweep jobs need Julia workers; launch with julia -p N mainSweep.jl")
-    count = min(15, length(workerIds), length(pending))
+    # One run per worker per launch (see the loop below), so a batch uses
+    # every worker the driver was started with -- there is no separate cap
+    # to keep in sync with `julia -p N`.
+    count = min(length(workerIds), length(pending))
     active = Dict{Int, Tuple{Int, Future}}()
     failed = String[]
 

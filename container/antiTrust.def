@@ -1,0 +1,39 @@
+Bootstrap: docker
+From: julia:1.10
+
+%labels
+    Author antiTrust2
+    Description Shared runtime image for the antiTrust2 sweep. One image is
+        reused by every per-experiment container; which scenario, data
+        directory, and code copy to use are all supplied at `apptainer exec`
+        time (see container/run_experiment.sh), not baked into the image.
+
+%post
+    set -eu
+    # Precompile the model's package dependencies into the image's own depot
+    # (/opt/julia-depot) at build time. This depot is read-only at run time;
+    # it is layered underneath each run's own writable depot (see
+    # run_experiment.sh) so packages never need to recompile per run, while
+    # new precompile cache (which Julia may still write per-process) lands
+    # somewhere writable instead of failing against a read-only image.
+    mkdir -p /opt/julia-depot
+    JULIA_DEPOT_PATH=/opt/julia-depot julia -e '
+        import Pkg
+        Pkg.add([
+            "CSV", "DataFrames", "DataFramesMeta", "Distributions",
+            "Graphs", "JLD2", "Combinatorics", "GraphPlot", "Compose",
+            "Colors", "Plots",
+        ])
+        Pkg.precompile()
+    '
+
+%environment
+    export JULIA_DEPOT_PATH=/opt/julia-depot
+
+%help
+    Shared image for antiTrust2 sweep containers. Do not `apptainer run` or
+    `exec` this image directly with julia paths baked in here -- use
+    container/run_experiment.sh, which binds a writable per-experiment code
+    copy at /model and a data directory at /results, and sets
+    ANTITRUST_EXPERIMENT / ANTITRUST_DATA_DIR / ANTITRUST_CONTROL_FILE /
+    JULIA_DEPOT_PATH before invoking Julia.

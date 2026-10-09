@@ -5,7 +5,6 @@
 #            Experiment Version                                                                           #
 #                                                                                                         #
 ###########################################################################################################
-cores=16
 using Distributed
 using Combinatorics
 @everywhere using CSV
@@ -19,7 +18,9 @@ using DataFramesMeta
 @everywhere using Dates
 include(joinpath(@__DIR__, "pathConfig.jl"))
 include(joinpath(@__DIR__, "sweepRecovery.jl"))
+include(joinpath(@__DIR__, "experimentConfig.jl"))
 modelPaths=prepareModelPaths(resolveModelPaths())
+experiment=experimentFromEnv()
 
 # now Step 1: Generate the control structure
 
@@ -76,37 +77,18 @@ ctrlFrame[!,"searchQty"]=searchQtyVec
 ctrlFrame[!,"modRun"]=modRunVec
 ctrlFrame[!,"order"].=0
 ctrlFrame[!,"initialized"]=repeat([false],size(ctrlFrame)[1])
-# now, we want to vary the time between Google and Duck Duck Go
+# now, pick the single intervention scenario this container runs
+# (ANTITRUST_EXPERIMENT: "baseline", "vpn", "deletion", or "sharing")
+# -10 for a tick means that event never happens
 
-# leave all events in to keep the data structure the same
-# but -10 tick means they never happen
-duckTick=[30]
-#vpnTick=[-10,5,50,110]
-vpnTick=[-10,50]
-deletionTick=[-10,50]
-sharingTick=[-10,50]
-duckFrame=DataFrame(:duckTick => duckTick)
-vpnFrame=DataFrame(:vpnTick => vpnTick)
-delFrame=DataFrame(:deletionTick => deletionTick)
-sharFrame=DataFrame(:sharingTick => sharingTick)
-
-tickFrame=crossjoin(duckFrame,vpnFrame,delFrame,sharFrame)
-
+ticks=experimentTicks(experiment)
+tickFrame=DataFrame(duckTick=[ticks.duckTick], vpnTick=[ticks.vpnTick],
+                     deletionTick=[ticks.deletionTick], sharingTick=[ticks.sharingTick])
 
 ctrlFrame=crossjoin(ctrlFrame,tickFrame)
 ctrlFrame.seed2=rand(DiscreteUniform(1,10000),size(ctrlFrame)[1])
 ctrlFrame.key=ctrlFrame.key.*string.(1:size(ctrlFrame)[1])
 ctrlFrame[!,"initialized"]=repeat([false],size(ctrlFrame)[1])
-# now introduce restrictions 
-# we only want runs where only one of vpnTick, deletionTick, or sharingTick is not -10
-ctrlFrame=filter(row -> (row.duckTick != -10 && row.vpnTick == -10 && row.deletionTick == -10 && row.sharingTick == -10) ||
-                        (row.duckTick != -10 && row.vpnTick != -10 && row.deletionTick == -10 && row.sharingTick == -10) ||
-                        (row.duckTick != -10 && row.vpnTick == -10 && row.deletionTick != -10 && row.sharingTick == -10) ||
-                        (row.duckTick != -10 && row.vpnTick == -10 && row.deletionTick == -10 && row.sharingTick != -10) ||
-                        (row.duckTick == -10 && row.vpnTick != -10 && row.deletionTick != -10 && row.sharingTick == -10) ||
-                        (row.duckTick == -10 && row.vpnTick != -10 && row.deletionTick == -10 && row.sharingTick != -10) ||
-                        (row.duckTick == -10 && row.vpnTick == -10 && row.deletionTick != -10 && row.sharingTick != -10), ctrlFrame)
-# and we need to set the order
 
 ctrlFrame[!, "complete"] = falses(size(ctrlFrame, 1))
 println(ctrlFrame)
