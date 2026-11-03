@@ -91,7 +91,15 @@ echo "  runtime: $runtime"
         # worker) per launch, so keep relaunching it until none are left.
         while true; do
             julia -p "$ANTITRUST_SWEEP_WORKERS" /model/mainSweep.jl
-            julia /model/container/pending_count.jl && break
+            if julia /model/container/pending_count.jl; then
+                break
+            else
+                status=$?
+                if [ "$status" -ne 2 ]; then
+                    echo "Pending-run check failed (exit $status); stopping experiment." >&2
+                    exit "$status"
+                fi
+            fi
         done
     '
 
