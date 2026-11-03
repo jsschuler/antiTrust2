@@ -1,75 +1,70 @@
-suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages({
+  script_arg <- grep("^--file=", commandArgs(), value = TRUE)
+  repo_root <- dirname(dirname(normalizePath(sub("^--file=", "", script_arg))))
+  source(file.path(repo_root, "analysisFunctions.R"))
+})
+options(dplyr.summarise.inform = FALSE)
 
-# Inspect and execute the actual summary-loop bodies without loading archived data
-# or running the scripts' plots and full permutation analyses.
-find_window_loops <- function(node) {
-  if (missing(node)) return(list())
-  found <- list()
-  if (is.call(node) && identical(node[[1]], as.name("for"))) {
-    body <- node[[4]]
-    if (is.call(body) && identical(body[[1]], as.name("{"))) {
-      statements <- as.list(body)[-1]
-      assigns <- function(expr, name) {
-        is.call(expr) && identical(expr[[1]], as.name("<-")) &&
-          identical(expr[[2]], as.name(name))
-      }
-      lower <- Filter(function(x) assigns(x, "loRng"), statements)
-      upper <- Filter(function(x) assigns(x, "hiRng"), statements)
-      if (length(lower) == 1 && length(upper) == 1) {
-        found <- list(list(body = body, lower = lower[[1]], upper = upper[[1]]))
-      }
-    }
-  }
-  if (is.call(node) || is.expression(node)) {
-    for (child in as.list(node)) {
-      found <- c(found, find_window_loops(child))
-    }
-  }
-  found
-}
+near <- function(x, y) isTRUE(all.equal(as.numeric(x), as.numeric(y), tolerance = 1e-9))
 
-script_arg <- grep("^--file=", commandArgs(), value = TRUE)
-repo_root <- dirname(dirname(normalizePath(sub("^--file=", "", script_arg))))
+# Window centers cover the full grid with inclusive bounds of the right width.
+stopifnot(length(windowCenters) == 9951, near(range(windowCenters), c(0.0025, 0.9975)))
+
+# Agents sit exactly on window boundaries, just outside them, and at random.
+set.seed(42)
+gridPts <- c(0, 0.0049, 0.005, 0.0051, 0.5, 0.4975, 0.5025, 0.9951, 1)
+privDex <- sort(c(gridPts, runif(3000)))
+googPct <- runif(length(privDex), 0, 100)
+selected <- runif(length(privDex)) < 0.5
+bounds <- windowBounds(privDex)
+fastMeans <- windowMeans(googPct, selected, bounds)
+fastSmry <- windowSummary(googPct, selected, bounds)
+
+# Reference: the original filter-per-window loop.
 checked <- 0L
-for (file in "dataAnalysisPVal.R") {
-  loops <- find_window_loops(parse(file.path(repo_root, file)))
-  stopifnot(length(loops) == 6)
-  for (loop in loops) {
-    env <- new.env()
-    env$window <- 50
-    env$t <- 25:9975
-    eval(loop$lower, env)
-    eval(loop$upper, env)
-    stopifnot(
-      all(env$loRng >= 0), all(env$hiRng <= 1),
-      all(abs(env$hiRng - env$loRng - 0.005) < 1e-12),
-      all(abs((env$hiRng + env$loRng) / 2 - env$t / 10000) < 1e-12)
-    )
-
-    # Check actual grouping, means, quantiles, and inclusive boundary membership.
-    for (center in c(0.0025, 0.5, 0.9975)) {
-      lower <- center - 0.0025
-      upper <- center + 0.0025
-      # Use the same exact grid coordinates at the inclusive boundaries.
-      bounds <- (round(center * 10000) + c(-25, 25)) / 10000
-      data <- data.frame(privDex = c(bounds[1], center, bounds[2]), googPct = c(10, 20, 30))
-      if (lower > 0) data <- rbind(data, data.frame(privDex = lower - 0.0001, googPct = 100))
-      if (upper < 1) data <- rbind(data, data.frame(privDex = upper + 0.0001, googPct = 100))
-      data <- bind_rows(lapply(c(0, 1, 2, 4), function(category) {
-        transform(data, category = category, permCat = category)
-      }))
-      env$agtVPN <- env$agtDel <- env$agtSharing <- env$permAgt <- data
-      env$t <- round(center * 10000)
-      env$datList <- list()
-      eval(loop$body, env)
-      result <- env$datList[[1]]
-      stopifnot(nrow(result) == 4, all(result$mn == 20), all(result$privDex == center))
-      if ("q50" %in% names(result)) {
-        stopifnot(all(result$q50 == 20), all(abs(result$q05 - 11) < 1e-12),
-          all(abs(result$q95 - 29) < 1e-12))
-      }
-    }
-    checked <- checked + 1L
+for (t in c(25, 26, 50, 51, 4975, 5000, 5025, 9951, 9975)){
+  loRng <- (t - window / 2) / 10000
+  hiRng <- (t + window / 2) / 10000
+  inWin <- privDex >= loRng & privDex <= hiRng & selected
+  j <- t - 24
+  if (any(inWin)){
+    x <- googPct[inWin]
+    stopifnot(near(fastMeans[j], mean(x)))
+    row <- fastSmry[abs(privDex - t / 10000) < 1e-12]
+    stopifnot(nrow(row) == 1, near(row$mn, mean(x)), near(row$q05, quantile(x, .05)),
+              near(row$q50, median(x)), near(row$q95, quantile(x, .95)))
+  } else {
+    stopifnot(is.nan(fastMeans[j]))
   }
+  checked <- checked + 1L
 }
-cat("Passed:", checked, "moving-average loops; full-grid bounds and synthetic summaries.\n")
+
+# Nearest-center lookup in mcArea matches the original which.min search.
+curveY <- abs(sin(windowCenters * 20))
+set.seed(7)
+fast <- mcArea(curveY, nSamps = 2000)
+set.seed(7)
+xSamps <- runif(2000, min(windowCenters), max(windowCenters))
+ySamps <- runif(2000, 0, max(curveY))
+slow <- (max(windowCenters) - min(windowCenters)) * max(curveY) *
+  mean(sapply(1:2000, function(i) ySamps[i] <= curveY[which.min(abs(windowCenters - xSamps[i]))]))
+stopifnot(near(fast, slow))
+
+# Agent-level test runs, and its permutations keep each privacy level's treated-run count.
+runs <- as.data.table(data.frame(key = paste0("k", 1:40), privacyVal = rep(c(0.5, 1.0), each = 20),
+                                 treated = rep(c(TRUE, FALSE), 20)))
+agt <- runs[rep(1:40, each = 25)][, `:=`(privDex = runif(.N), googPct = runif(.N, 0, 100))]
+res <- agentLevelTest(agt, 1, 2, nPerm = 20)
+stopifnot(length(res$null) == 20, all(res$null >= 0), res$obs >= 0,
+          nrow(res$treated) > 0, nrow(res$untreated) > 0)
+set.seed(2)
+for (i in 1:20){
+  permLab <- permuteWithin(runs$treated, runs$privacyVal)
+  stopifnot(sum(permLab[runs$privacyVal == 0.5]) == 10, sum(permLab[runs$privacyVal == 1.0]) == 10)
+}
+# lopsided strata: the pooled shuffle would move treated runs between levels
+lopsided <- rep(c(TRUE, FALSE), c(5, 35))
+lev <- rep(1:2, each = 20)
+stopifnot(all(replicate(50, sum(permuteWithin(lopsided, lev)[lev == 1])) == 5))
+
+cat("Passed:", checked, "window checks against the filter loop, Monte Carlo lookup, and stratified agent permutations.\n")

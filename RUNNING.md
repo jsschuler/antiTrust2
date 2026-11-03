@@ -43,8 +43,24 @@ the driver process on a 64-core machine; lower it if several sweeps share a
 machine (see the Apptainer section). Use the same path and experiment
 settings for generation and every sweep launch of a given run. `singleRun.jl`
 uses the data directory without loading the control file or
-`ANTITRUST_EXPERIMENT`. R analysis scripts still have their existing input
-paths.
+`ANTITRUST_EXPERIMENT`.
+
+# R analysis
+
+`dataAnalysisPVal.R` reads all four experiments from `dataRoot`
+(`~/ResearchCode/antitrust2-data`, expecting `<experiment>/data/` under it as
+`run_experiment.sh` writes them) and saves plots to `imageDir`
+(`~/ResearchCode/antiTrustImages`); both are set near the top of the script.
+Shared functions live in `analysisFunctions.R`, tested by `test/*.R`:
+
+```sh
+Rscript dataAnalysisPVal.R
+for t in test/*.R; do Rscript "$t"; done
+```
+
+It writes `effect_size_summary.csv` and a timestamped `analysis_artifacts/`
+folder into `dataRoot`; `replot_from_artifacts.R` restyles the run-level plots
+from the latest one.
 
 # Apptainer: one container per experiment
 

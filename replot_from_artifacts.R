@@ -11,8 +11,8 @@ suppressPackageStartupMessages({
 #   Rscript replot_from_artifacts.R /abs/path/to/artifacts /abs/path/to/output_dir
 
 args <- commandArgs(trailingOnly = TRUE)
-repo_root <- getwd()
-artifacts_root <- file.path(repo_root, "analysis_artifacts")
+# dataAnalysisPVal.R writes its artifacts under its dataRoot
+artifacts_root <- file.path("~/ResearchCode/antitrust2-data", "analysis_artifacts")
 latest_ptr <- file.path(artifacts_root, "LATEST_ARTIFACT_DIR.txt")
 
 if (length(args) >= 1) {

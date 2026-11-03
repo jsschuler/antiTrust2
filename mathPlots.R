@@ -14,7 +14,6 @@ vpnColor <- "purple"
 
 X <- seq(0,1,.01)
 Y <- dbeta(X,5,5)
-setwd("~/Dropbox/Data\ Archive/antiTrustData")
 # get quantiles
 qbeta(c(.05,.25,.5,.75,.95),5,5) -> qs
 
@@ -39,7 +38,7 @@ ggplot() + geom_line(aes(x=X,y=Y)) +  geom_segment(aes(x=0,y=0,xend=1,yend=0), l
   legend.background = element_rect(fill = bgFill),
   legend.text = element_text(color =basePoint)) -> modePlot
 
-ggsave("modeDist.png",modePlot)
+ggsave(file.path("~/ResearchCode/antiTrustImages","modeDist.png"),modePlot)
 
 X <- seq(0,1,.01)
 Y <- dexp(X,5)
@@ -68,7 +67,7 @@ ggplot() + geom_line(aes(x=X,y=Y)) +  geom_segment(aes(x=0,y=0,xend=1,yend=0), l
     legend.background = element_rect(fill = bgFill),
     legend.text = element_text(color =basePoint)) -> expPlot
 
-ggsave("IntDist.png",expPlot)
+ggsave(file.path("~/ResearchCode/antiTrustImages","IntDist.png"),expPlot)
 
 # now generate a sample for 5 different agents 
 
