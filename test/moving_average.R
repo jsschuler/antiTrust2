@@ -8,11 +8,17 @@ options(dplyr.summarise.inform = FALSE)
 near <- function(x, y) isTRUE(all.equal(as.numeric(x), as.numeric(y), tolerance = 1e-9))
 
 # Window centers cover the full grid with inclusive bounds of the right width.
-stopifnot(length(windowCenters) == 9951, near(range(windowCenters), c(0.0025, 0.9975)))
+half <- window / 2
+stopifnot(length(windowCenters) == 10001 - window,
+          near(range(windowCenters), c(half, 10000 - half) / 10000))
+
+# Check windows at both ends, either side of the first step, and mid-range.
+checkTicks <- c(half, half + 1, window, window + 1, 5000 - half, 5000, 5000 + half, 10000 - window + 1, 10000 - half)
 
 # Agents sit exactly on window boundaries, just outside them, and at random.
 set.seed(42)
-gridPts <- c(0, 0.0049, 0.005, 0.0051, 0.5, 0.4975, 0.5025, 0.9951, 1)
+edges <- c(checkTicks - half, checkTicks + half) / 10000
+gridPts <- pmin(pmax(c(edges, edges - 1e-4, edges + 1e-4), 0), 1)
 privDex <- sort(c(gridPts, runif(3000)))
 googPct <- runif(length(privDex), 0, 100)
 selected <- runif(length(privDex)) < 0.5
@@ -22,11 +28,11 @@ fastSmry <- windowSummary(googPct, selected, bounds)
 
 # Reference: the original filter-per-window loop.
 checked <- 0L
-for (t in c(25, 26, 50, 51, 4975, 5000, 5025, 9951, 9975)){
+for (t in checkTicks){
   loRng <- (t - window / 2) / 10000
   hiRng <- (t + window / 2) / 10000
   inWin <- privDex >= loRng & privDex <= hiRng & selected
-  j <- t - 24
+  j <- t - half + 1
   if (any(inWin)){
     x <- googPct[inWin]
     stopifnot(near(fastMeans[j], mean(x)))

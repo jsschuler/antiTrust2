@@ -122,8 +122,9 @@ runLevelTest <- function(googPct, treated, seed){
 
 #### AGENT-LEVEL MOVING WINDOWS ####
 
-# window centers on the privacy index: 50/10000 wide, stepping by 1/10000
-window <- 50
+# window centers on the privacy index: 500/10000 wide (+-0.025), stepping by
+# 1/10000; narrower windows hold too few agents and the quantile curves are noise
+window <- 500
 windowCenters <- ((window / 2):(10000 - window / 2)) / 10000
 
 # first and last position of each window [center - w/2, center + w/2] (both ends
