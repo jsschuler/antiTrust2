@@ -71,11 +71,11 @@ merge(dat$agentDat, dat$agentPct, by = c("key", "agent")) %>%
 agtSmry[, privDex := blissPoint / unifExp]
 
 agentPanel <- function(smry, title){
-  ggplot(smry) + geom_line(aes(x = privDex, y = mn), linewidth = 1.2) +
-    geom_line(aes(x = privDex, y = q05), alpha = .8, linetype = "dotted", linewidth = 1) +
-    geom_line(aes(x = privDex, y = q95), alpha = .8, linetype = "dotted", linewidth = 1) +
+  ggplot(smry) + geom_line(aes(x = privDex, y = mn), linewidth = 0.4) +
+    geom_line(aes(x = privDex, y = q05), alpha = .8, linetype = "dotted", linewidth = 0.25) +
+    geom_line(aes(x = privDex, y = q95), alpha = .8, linetype = "dotted", linewidth = 0.25) +
     geom_ribbon(aes(x = privDex, ymin = q25, ymax = q75), alpha = .4) +
-    geom_line(aes(x = privDex, y = q50), linetype = "dotted", linewidth = 1.2) +
+    geom_line(aes(x = privDex, y = q50), linetype = "dotted", linewidth = 0.4) +
     plotTheme() +
     labs(x = "Agent Privacy Index", y = "% Hoogle Usage", title = title) + ylim(0, 100)
 }
