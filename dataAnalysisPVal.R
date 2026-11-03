@@ -9,7 +9,8 @@
 # Each intervention (VPN, deletion, sharing) is compared against the
 # DuckDuckGo-entry-only baseline at three levels:
 #   run level   - mean Google share from tick 50 on, within each privacy level
-#   agent level - moving average of agent Google share along the privacy index
+#   agent level - moving average of agent Google share along the privacy index,
+#                 within each privacy level
 #   time        - median Google share per tick, within each privacy level
 
 script_arg <- grep("^--file=", commandArgs(), value = TRUE)
@@ -80,26 +81,41 @@ agentPanel <- function(smry, title){
     labs(x = "Agent Privacy Index", y = "% Hoogle Usage", title = title) + ylim(0, 100)
 }
 
+titledGrid <- function(label, grid){
+  title <- ggdraw() + draw_label(label, fontface = "bold", size = 14, hjust = 0.5)
+  plot_grid(title, grid, ncol = 1, rel_heights = c(0.12, 1))
+}
+
+# each intervention is tested separately within each privacy level, since an
+# intervention can move privacy-minded and privacy-indifferent agents in
+# opposite directions and the pooled effect then depends on the population mix
 agentEffects <- list()
 for (iv in interventions){
-  agt <- agtSmry[category %in% c(0, iv$cat)][, treated := category == iv$cat]
-  test <- agentLevelTest(agt, iv$agentSeeds[1], iv$agentSeeds[2])
-  effectRow(paste0("Privacy - ", iv$name), test$obs, test$null) -> row
-  agentEffects[[length(agentEffects) + 1]] <- row
+  levelGrids <- list()
+  basePanels <- list()
+  for (lev in c("Low", "High")){
+    privacy <- if (lev == "Low") 1.0 else 0.5
+    agt <- agtSmry[privacyVal == privacy & category %in% c(0, iv$cat)][, treated := category == iv$cat]
+    test <- agentLevelTest(agt, iv$agentSeeds[1] + (lev == "High"), iv$agentSeeds[2] + (lev == "High"))
+    effectRow(paste0("Privacy - ", iv$name, " (", tolower(privLabs[[lev]]), " privacy)"), test$obs, test$null) -> row
+    agentEffects[[length(agentEffects) + 1]] <- row
 
-  # the untreated runs are the baseline, so any pair gives the baseline curve
+    basePanels[[lev]] <- agentPanel(test$untreated, paste(privLabs[[lev]], "Privacy Preference"))
+    plot_grid(agentPanel(test$untreated, paste("No", iv$name)), agentPanel(test$treated, iv$name),
+              align = "h", axis = "lr", ncol = 2) -> grid
+    levelGrids[[lev]] <- titledGrid(paste0(privLabs[[lev]], " Privacy Preference (d=", round(row$effect_size, 3),
+                                           ", p ", row$p_report, ")"), grid)
+  }
+
+  # the untreated runs are the baseline, so any pair gives the baseline curves
   if (iv$cat == 1){
-    agentPanel(test$untreated, "Hoogle Usage With Respect to Agent Privacy Preference")
+    titledGrid("Hoogle Usage With Respect to Agent Privacy Preference",
+               plot_grid(basePanels$Low, basePanels$High, align = "h", axis = "lr", ncol = 2))
     ggsave(file.path(imageDir, "base.png"), width = 12, height = 6, bg = bgFill)
   }
 
-  plot_grid(agentPanel(test$untreated, paste("No", iv$name)), agentPanel(test$treated, iv$name),
-            align = "h", axis = "lr", ncol = 2) -> grid
-  title <- ggdraw() +
-    draw_label(paste0("Hoogle Usage (d=", round(row$effect_size, 3), ", p ", row$p_report, ")"),
-               fontface = "bold", size = 14, hjust = 0.5)
-  plot_grid(title, grid, ncol = 1, rel_heights = c(0.12, 1))
-  ggsave(file.path(imageDir, paste0(iv$file, "Agent.png")), width = 12, height = 6, bg = bgFill)
+  plot_grid(levelGrids$Low, levelGrids$High, ncol = 1)
+  ggsave(file.path(imageDir, paste0(iv$file, "Agent.png")), width = 12, height = 12, bg = bgFill)
 }
 
 #### TIME TRENDS ####
@@ -142,7 +158,7 @@ for (iv in interventions){
 
 #### EFFECT TABLE AND ARTIFACTS ####
 
-# rows 1-6 run level, 7-9 agent level, 10-15 time; replot_from_artifacts.R
+# rows 1-6 run level, 7-12 agent level, 13-18 time; replot_from_artifacts.R
 # relies on the run-level rows coming first
 effectTable <- rbind(rbindlist(runEffects), rbindlist(agentEffects), rbindlist(timeEffects))
 print(effectTable)

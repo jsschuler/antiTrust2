@@ -155,7 +155,7 @@ permutation tests throughout:
   separately for each `privacyVal`. Figures `vpnDist.png`,
   `deletionDist.png`, `sharingDist.png`.
 - **Agent level:** moving average of incumbent share along the agent privacy
-  index, with labels permuted within each `privacyVal`. Figures `base.png`,
+  index, separately for each `privacyVal`. Figures `base.png`,
   `vpnAgent.png`, `deletionAgent.png`, `sharingAgent.png`.
 - **Over time:** median incumbent share per tick, separately for each
   `privacyVal`. Figures `vpnTimeByPrivacy.png`, `DeletionTimeByPrivacy.png`,
